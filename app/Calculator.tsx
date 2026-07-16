@@ -309,6 +309,13 @@ function money(value: number, currency: string) {
   return `${currency}${Math.round(value).toLocaleString()}`;
 }
 
+function moneyWithCents(value: number, currency: string) {
+  return `${currency}${value.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
 function number(value: number, digits = 2) {
   return value.toLocaleString(undefined, {
     maximumFractionDigits: digits,
@@ -433,7 +440,7 @@ export function Calculator() {
                 Total saving potential
               </p>
               <p className="mt-1 text-3xl font-semibold text-[#111827]">
-                {money(totalSaving, input.currency)}
+                {moneyWithCents(totalSaving, input.currency)}
               </p>
             </div>
           </div>
@@ -957,7 +964,7 @@ function ReportPageTable({
                 money(report.engineeringSavingPotential, currency),
                 "Saving potential production",
                 money(report.productionSavingPotential, currency),
-                money(
+                moneyWithCents(
                   report.engineeringSavingPotential + report.productionSavingPotential,
                   currency,
                 ),
