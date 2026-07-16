@@ -436,26 +436,6 @@ export function Calculator() {
             <div className="mt-4 grid gap-4">
               <div>
                 <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#64748b]">
-                  Company
-                </p>
-                <div className="grid gap-3">
-                  <label className="grid gap-1">
-                    <span className="text-sm font-medium text-[#4d5662]">
-                      Company name
-                    </span>
-                    <input className={inputClass} />
-                  </label>
-                  <label className="grid gap-1">
-                    <span className="text-sm font-medium text-[#4d5662]">
-                      Segment / industry
-                    </span>
-                    <input className={inputClass} />
-                  </label>
-                </div>
-              </div>
-
-              <div>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#64748b]">
                   Engineering status
                 </p>
                 <div className="grid gap-3 sm:grid-cols-2">
