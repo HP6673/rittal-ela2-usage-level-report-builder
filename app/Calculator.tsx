@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { workbookSheets } from "./workbookData";
 
 type Inputs = {
   projectsPerYear: number;
@@ -44,6 +45,20 @@ const productionTargetLevel = 3.5;
 const avg = (...values: number[]) =>
   values.reduce((sum, value) => sum + value, 0) / values.length;
 
+const levelLabels = [
+  "1",
+  "1.5",
+  "2",
+  "2.5",
+  "3",
+  "3.5",
+  "4",
+  "4.5",
+  "5",
+  "As-is",
+  "Target",
+];
+
 function interpolate(level: number, values: number[]) {
   const clamped = Math.max(1, Math.min(5, level));
   const lowerIndex = Math.floor((clamped - 1) * 2);
@@ -55,7 +70,7 @@ function interpolate(level: number, values: number[]) {
   return values[lowerIndex] + (values[upperIndex] - values[lowerIndex]) * ratio;
 }
 
-function engineeringEfficiencyValues(input: Inputs) {
+function engineeringChartData(input: Inputs) {
   const k5 = 0.05;
   const k6 = 0.03;
   const k9 = 0.05;
@@ -90,11 +105,33 @@ function engineeringEfficiencyValues(input: Inputs) {
     rows.reduce((sum, row) => sum + row[index], 0),
   );
   const sum2 = [0, 0.03, 0.04, 0.05, 0.07, 0.07, 0.08, 0.09, 0.1];
+  const standardization = [
+    ...sum2,
+    interpolate(engineeringCurrentLevel, sum2),
+    interpolate(engineeringTargetLevel, sum2),
+  ];
+  const engineering = [
+    ...sum1,
+    interpolate(engineeringCurrentLevel, sum1),
+    interpolate(engineeringTargetLevel, sum1),
+  ];
+  const total = engineering.map((value, index) => value + standardization[index]);
 
-  return sum1.map((value, index) => value + sum2[index]);
+  return {
+    labels: levelLabels,
+    primaryLabel: "Engineering",
+    secondaryLabel: "Standardization",
+    primary: engineering,
+    secondary: standardization,
+    total,
+  };
 }
 
-function productionEfficiencyValues(input: Inputs) {
+function engineeringEfficiencyValues(input: Inputs) {
+  return engineeringChartData(input).total;
+}
+
+function productionChartData(input: Inputs) {
   const staticRows = [
     [0.018, 0.01575, 0.0135, 0.01125, 0.009, 0.009, 0.009, 0.009, 0.009],
     [0.092, 0.087, 0.082, 0.077, 0.072, 0.0435, 0.015, 0.015, 0.015],
@@ -133,9 +170,39 @@ function productionEfficiencyValues(input: Inputs) {
   ];
   const rows = [...staticRows, article3d, cabinetDesign];
 
-  return rows[0].map((_, index) =>
-    rows.reduce((sum, row) => sum + row[index], 0),
+  const production = staticRows[0].map((_, index) =>
+    staticRows.reduce((sum, row) => sum + row[index], 0),
   );
+  const standardization = article3d.map((value, index) => value + cabinetDesign[index]);
+  const totalLevelValues = production.map(
+    (value, index) => value + standardization[index],
+  );
+  const productionWithMarkers = [
+    ...production,
+    interpolate(productionCurrentLevel, production),
+    interpolate(productionTargetLevel, production),
+  ];
+  const standardizationWithMarkers = [
+    ...standardization,
+    interpolate(productionCurrentLevel, standardization),
+    interpolate(productionTargetLevel, standardization),
+  ];
+
+  return {
+    labels: levelLabels,
+    primaryLabel: "Production",
+    secondaryLabel: "Standardization",
+    primary: productionWithMarkers,
+    secondary: standardizationWithMarkers,
+    total: productionWithMarkers.map(
+      (value, index) => value + standardizationWithMarkers[index],
+    ),
+    levelTotals: totalLevelValues,
+  };
+}
+
+function productionEfficiencyValues(input: Inputs) {
+  return productionChartData(input).levelTotals;
 }
 
 function calculate(input: Inputs) {
@@ -250,6 +317,8 @@ const fieldGroups = [
 export function Calculator() {
   const [input, setInput] = useState<Inputs>(defaults);
   const report = useMemo(() => calculate(input), [input]);
+  const engineeringChart = useMemo(() => engineeringChartData(input), [input]);
+  const productionChart = useMemo(() => productionChartData(input), [input]);
   const totalSaving =
     report.engineeringSavingPotential + report.productionSavingPotential;
 
@@ -385,6 +454,11 @@ export function Calculator() {
           </div>
         </div>
 
+        <div className="mt-5 grid gap-5 lg:grid-cols-2">
+          <WorkbookChart title="Engineering time [%]" data={engineeringChart} />
+          <WorkbookChart title="Production time [%]" data={productionChart} />
+        </div>
+
         <div className="mt-5 overflow-hidden rounded-md border border-[#d6dce3] bg-white shadow-[0_14px_35px_rgba(15,23,42,0.08)]">
           <div className="grid bg-[#28323f] text-sm font-semibold text-white md:grid-cols-2">
             <div className="border-b border-white/20 p-4 md:border-b-0 md:border-r">
@@ -431,6 +505,8 @@ export function Calculator() {
             </div>
           ))}
         </div>
+
+        <WorkbookExplorer />
       </section>
     </main>
   );
@@ -487,4 +563,148 @@ function EfficiencyTable({
       </div>
     </div>
   );
+}
+
+function WorkbookChart({
+  title,
+  data,
+}: {
+  title: string;
+  data: {
+    labels: string[];
+    primaryLabel: string;
+    secondaryLabel: string;
+    primary: number[];
+    secondary: number[];
+    total: number[];
+  };
+}) {
+  const max = Math.max(...data.total, 1);
+
+  return (
+    <div className="rounded-md border border-[#d6dce3] bg-white p-5 shadow-[0_14px_35px_rgba(15,23,42,0.08)]">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-base font-semibold text-[#111827]">{title}</h2>
+        <div className="flex items-center gap-4 text-xs font-medium text-[#52606d]">
+          <span className="inline-flex items-center gap-2">
+            <span className="h-3 w-3 rounded-sm bg-[#2563eb]" />
+            {data.primaryLabel}
+          </span>
+          <span className="inline-flex items-center gap-2">
+            <span className="h-3 w-3 rounded-sm bg-[#f59e0b]" />
+            {data.secondaryLabel}
+          </span>
+        </div>
+      </div>
+      <div className="mt-5 h-72 overflow-x-auto">
+        <div className="flex h-full min-w-[680px] items-end gap-3 border-l border-b border-[#d7dde5] px-3 pb-8">
+          {data.labels.map((label, index) => {
+            const primaryHeight = (data.primary[index] / max) * 100;
+            const secondaryHeight = (data.secondary[index] / max) * 100;
+
+            return (
+              <div className="relative flex h-full flex-1 flex-col justify-end" key={label}>
+                <div className="flex h-[88%] items-end">
+                  <div
+                    className="mx-auto flex w-full max-w-9 flex-col justify-end overflow-hidden rounded-t-sm bg-[#e5e7eb]"
+                    title={`${label}: ${(data.total[index] * 100).toFixed(1)}%`}
+                  >
+                    <div
+                      className="bg-[#f59e0b]"
+                      style={{ height: `${secondaryHeight}%` }}
+                    />
+                    <div
+                      className="bg-[#2563eb]"
+                      style={{ height: `${primaryHeight}%` }}
+                    />
+                  </div>
+                </div>
+                <span className="absolute -bottom-7 left-1/2 w-12 -translate-x-1/2 text-center text-xs text-[#52606d]">
+                  {label}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function WorkbookExplorer() {
+  const [activeSheet, setActiveSheet] = useState(workbookSheets[0]?.name ?? "");
+  const sheet =
+    workbookSheets.find((candidate) => candidate.name === activeSheet) ??
+    workbookSheets[0];
+
+  if (!sheet) {
+    return null;
+  }
+
+  return (
+    <div className="mt-5 rounded-md border border-[#d6dce3] bg-white p-5 shadow-[0_14px_35px_rgba(15,23,42,0.08)]">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#52606d]">
+            Full workbook content
+          </p>
+          <h2 className="mt-1 text-xl font-semibold text-[#111827]">
+            Worksheet Browser
+          </h2>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {workbookSheets.map((candidate) => (
+            <button
+              className={`rounded border px-3 py-2 text-sm font-medium transition ${
+                candidate.name === sheet.name
+                  ? "border-[#2563eb] bg-[#eff6ff] text-[#1d4ed8]"
+                  : "border-[#d6dce3] bg-white text-[#52606d] hover:border-[#94a3b8]"
+              }`}
+              key={candidate.name}
+              type="button"
+              onClick={() => setActiveSheet(candidate.name)}
+            >
+              {candidate.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-5 overflow-auto rounded border border-[#d6dce3]">
+        <table className="min-w-full border-collapse text-left text-sm">
+          <tbody>
+            {sheet.rows.map((row) => (
+              <tr className="border-b border-[#edf0f3]" key={row.row}>
+                <th className="sticky left-0 z-10 border-r border-[#d6dce3] bg-[#f8fafc] px-3 py-2 text-xs font-semibold text-[#52606d]">
+                  {row.row}
+                </th>
+                {row.values.map((value, index) => (
+                  <td
+                    className="min-w-28 max-w-80 border-r border-[#edf0f3] px-3 py-2 align-top text-[#313842]"
+                    key={`${row.row}-${index}`}
+                  >
+                    {formatCellValue(value)}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function formatCellValue(value: string | number | null) {
+  if (value === null) {
+    return "";
+  }
+
+  if (typeof value === "number") {
+    return Math.abs(value) < 1 && value !== 0
+      ? number(value, 3)
+      : value.toLocaleString(undefined, { maximumFractionDigits: 3 });
+  }
+
+  return value;
 }
