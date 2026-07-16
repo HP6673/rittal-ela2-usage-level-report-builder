@@ -58,6 +58,14 @@ const baseLevelLabels = [
 
 const yAxisTicks = [1, 0.75, 0.5, 0.25, 0];
 
+const levelKey = [
+  ["1", "Basic - AutoCAD LT"],
+  ["2", "Enhanced - ACE"],
+  ["3", "Advanced - EPLAN"],
+  ["4", "Automation - EPLAN eBuild"],
+  ["5", "Configuration - EEC"],
+] as const;
+
 function interpolate(level: number, values: number[]) {
   const clamped = Math.max(1, Math.min(5, level));
   const lowerIndex = Math.floor((clamped - 1) * 2);
@@ -641,13 +649,7 @@ export function Calculator() {
         <ReportPageTable report={report} currency={input.currency} />
 
         <div className="mt-5 grid gap-3 rounded-md border border-[#d6dce3] bg-white p-5 shadow-[0_14px_35px_rgba(15,23,42,0.08)] md:grid-cols-5">
-          {[
-            ["1", "Basic - AutoCAD LT"],
-            ["2", "Enhanced - ACE"],
-            ["3", "Advanced - EPLAN"],
-            ["4", "Automation - EPLAN eBuild"],
-            ["5", "Configuration - EEC"],
-          ].map(([level, label]) => (
+          {levelKey.map(([level, label]) => (
             <div
               className="rounded border border-[#e2e8f0] bg-white p-3 shadow-[0_8px_18px_rgba(15,23,42,0.05)]"
               key={level}
@@ -808,12 +810,21 @@ function WorkbookChart({
     x: number;
     y: number;
   } | null>(null);
+  const [axisTooltip, setAxisTooltip] = useState<{
+    level: string;
+    label: string;
+    x: number;
+    y: number;
+  } | null>(null);
   const max = Math.max(...data.total, 1);
 
   return (
     <div
       className="rounded-md border border-[#d6dce3] bg-white p-5 shadow-[0_14px_35px_rgba(15,23,42,0.08)]"
-      onMouseLeave={() => setTooltip(null)}
+      onMouseLeave={() => {
+        setTooltip(null);
+        setAxisTooltip(null);
+      }}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-base font-semibold text-[#111827]">{title}</h2>
@@ -857,23 +868,29 @@ function WorkbookChart({
                   total === 0 ? 0 : (data.primary[index] / total) * 100;
                 const secondaryHeight =
                   total === 0 ? 0 : (data.secondary[index] / total) * 100;
+                const levelDescription = levelKey.find(
+                  ([level]) => level === label,
+                )?.[1];
 
                 return (
                   <div
                     className="relative flex h-full flex-1 flex-col justify-end"
                     key={label}
-                    onMouseMove={(event) =>
-                      setTooltip({
-                        label,
-                        primary: data.primary[index],
-                        secondary: data.secondary[index],
-                        total,
-                        x: event.clientX,
-                        y: event.clientY,
-                      })
-                    }
                   >
-                    <div className="flex h-[88%] items-end">
+                    <div
+                      className="flex h-[88%] items-end"
+                      onMouseMove={(event) => {
+                        setAxisTooltip(null);
+                        setTooltip({
+                          label,
+                          primary: data.primary[index],
+                          secondary: data.secondary[index],
+                          total,
+                          x: event.clientX,
+                          y: event.clientY,
+                        });
+                      }}
+                    >
                       <div
                         className="mx-auto flex w-full max-w-9 flex-col justify-end overflow-hidden rounded-t-sm bg-[#e5e7eb]"
                         style={{ height: `${barHeight}%` }}
@@ -888,7 +905,26 @@ function WorkbookChart({
                         />
                       </div>
                     </div>
-                    <span className="absolute -bottom-7 left-1/2 w-12 -translate-x-1/2 text-center text-xs text-[#52606d]">
+                    <span
+                      className={`absolute -bottom-7 left-1/2 w-12 -translate-x-1/2 text-center text-xs text-[#52606d] ${
+                        levelDescription ? "cursor-help font-semibold" : ""
+                      }`}
+                      onMouseMove={(event) => {
+                        if (!levelDescription) {
+                          return;
+                        }
+
+                        event.stopPropagation();
+                        setTooltip(null);
+                        setAxisTooltip({
+                          level: label,
+                          label: levelDescription,
+                          x: event.clientX,
+                          y: event.clientY,
+                        });
+                      }}
+                      onMouseLeave={() => setAxisTooltip(null)}
+                    >
                       {label}
                     </span>
                   </div>
@@ -928,6 +964,19 @@ function WorkbookChart({
               </span>
             </p>
           </div>
+        </div>
+      ) : null}
+      {axisTooltip ? (
+        <div
+          className="fixed z-[9999] min-w-56 rounded-md border border-[#111827] bg-white p-3 text-sm shadow-[0_20px_55px_rgba(15,23,42,0.28)]"
+          style={{
+            left: axisTooltip.x,
+            top: axisTooltip.y,
+            transform: "translate(-50%, calc(-100% - 16px))",
+          }}
+        >
+          <p className="font-semibold text-[#111827]">Level {axisTooltip.level}</p>
+          <p className="mt-2 text-[#4d5662]">{axisTooltip.label}</p>
         </div>
       ) : null}
     </div>
