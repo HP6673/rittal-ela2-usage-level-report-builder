@@ -334,13 +334,6 @@ const percentFields: Array<keyof Inputs> = [
   "etoFuture",
 ];
 
-const currencies = [
-  ["$", "USD"],
-  ["€", "EUR"],
-  ["£", "GBP"],
-  ["¥", "JPY"],
-] as const;
-
 const questionnaireFaq = [
   {
     section: "Engineering Level Assessment",
@@ -417,8 +410,13 @@ export function Calculator() {
       <section className="border-b border-[#dfe3e8] bg-white shadow-[0_12px_30px_rgba(15,23,42,0.06)]">
         <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <h1 className="mt-2 text-3xl font-semibold tracking-normal text-[#111827] sm:text-4xl">
+            <div className="flex items-center gap-4">
+              <img
+                alt="Rittal"
+                className="h-16 w-44 rounded bg-white object-cover object-center shadow-[0_8px_18px_rgba(15,23,42,0.12)]"
+                src="/rittal-logo.png"
+              />
+              <h1 className="text-3xl font-semibold tracking-normal text-[#111827] sm:text-4xl">
                 ELA2 Usage Level Report Builder
               </h1>
             </div>
@@ -487,8 +485,9 @@ export function Calculator() {
                 <span className="text-sm font-medium text-[#4d5662]">
                   Currency
                 </span>
-                <select
+                <input
                   className={inputClass}
+                  maxLength={4}
                   value={input.currency}
                   onChange={(event) =>
                     setInput((current) => ({
@@ -496,13 +495,7 @@ export function Calculator() {
                       currency: event.target.value,
                     }))
                   }
-                >
-                  {currencies.map(([symbol, label]) => (
-                    <option key={symbol} value={symbol}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
+                />
               </label>
             </div>
           </div>
