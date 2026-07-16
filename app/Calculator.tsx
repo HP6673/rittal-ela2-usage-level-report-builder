@@ -322,11 +322,9 @@ function normalizeNumericInput(value: string) {
 
 function formatFaqAnswer(answer: string) {
   const answerWithoutNumber = answer.replace(/^\d+\.\s*/, "").trim();
-  const punctuated = /[.!?]$/.test(answerWithoutNumber)
+  return /[.!?]$/.test(answerWithoutNumber)
     ? answerWithoutNumber
     : `${answerWithoutNumber}.`;
-
-  return `The selected answer is "${punctuated}"`;
 }
 
 const percentFields: Array<keyof Inputs> = [
