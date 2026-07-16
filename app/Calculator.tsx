@@ -421,7 +421,7 @@ export function Calculator() {
             <div className="flex items-center gap-4">
               <img
                 alt="Rittal"
-                className="h-16 w-44 rounded bg-white object-cover object-center shadow-[0_8px_18px_rgba(15,23,42,0.12)]"
+                className="h-20 w-32 rounded bg-white object-contain p-2 shadow-[0_8px_18px_rgba(15,23,42,0.12)] sm:w-40"
                 src="/rittal-logo.png"
               />
               <h1 className="text-3xl font-semibold tracking-normal text-[#111827] sm:text-4xl">
