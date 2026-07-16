@@ -20,19 +20,19 @@ type Inputs = {
 };
 
 const defaults: Inputs = {
-  projectsPerYear: 50,
-  pagesPerProject: 100,
-  engineeringTimeShare: 1,
-  panelsPerYear: 100,
-  productionTimeShare: 1,
-  engineeringFte: 2,
-  engineeringRate: 75,
-  productionFte: 4,
-  productionRate: 40,
-  etoCurrent: 0.8,
-  etoFuture: 0.3,
-  workingHoursPerDay: 8,
-  workingDaysPerYear: 235,
+  projectsPerYear: 0,
+  pagesPerProject: 0,
+  engineeringTimeShare: 0,
+  panelsPerYear: 0,
+  productionTimeShare: 0,
+  engineeringFte: 0,
+  engineeringRate: 0,
+  productionFte: 0,
+  productionRate: 0,
+  etoCurrent: 0,
+  etoFuture: 0,
+  workingHoursPerDay: 0,
+  workingDaysPerYear: 0,
   currency: "$",
 };
 
@@ -277,38 +277,53 @@ function normalizeNumericInput(value: string) {
   return Number(normalized);
 }
 
-const fieldGroups = [
+const percentFields: Array<keyof Inputs> = [
+  "engineeringTimeShare",
+  "productionTimeShare",
+  "etoCurrent",
+  "etoFuture",
+];
+
+const currencies = [
+  ["$", "USD"],
+  ["€", "EUR"],
+  ["£", "GBP"],
+  ["¥", "JPY"],
+] as const;
+
+const questionnaireFaq = [
   {
-    title: "Business output",
-    fields: [
-      ["projectsPerYear", "Projects / year"],
-      ["pagesPerProject", "Pages / project"],
-      ["engineeringTimeShare", "Time share engineering"],
-      ["panelsPerYear", "Panels / year"],
-      ["productionTimeShare", "Time share production"],
+    section: "Engineering Level Assessment",
+    items: [
+      ["Order specifications", "How does the customer and order data reach the design department?", "1. Order data and requirements are transferred unstructured and mainly in paper. Supported by various meetings."],
+      ["Order specifications", "How is the order data and requirements handled in the design department?", "1. The storage of order data and requirements is mainly digital but not reusable (e.g. scanned documents, sketches, PDF)."],
+      ["Order specifications", "Does the order data transferred to the design department contains a sensor-actuator lists?", "3. The design department receives preliminairy sensor-actuator list."],
+      ["Delivery specifications", "Applicable norms and standards", "3. Templates and structures take into account the some variance in requirements."],
+      ["Delivery specifications", "Used languages and translation", "1. Changes in requirements are processed manual."],
+      ["Delivery specifications", "Parts selection and standardisations", "3. Templates and structures take into account the some variance in requirements."],
+      ["Delivery specifications", "Documentation (Source target specification,...)", "3. Templates and structures take into account the some variance in requirements."],
+      ["Engineering", "How are new technical solutions (ETO) developed?", "3. New technical solutions are designed in a digital process."],
+      ["Design", "How are circuit diagrams created?", "1. The circuit diagrams are created manually by placing graphical symbols or partial circuits (e.g. copy and paste)."],
+      ["Check", "How are circuit diagrams verified after creation?", "1. The verification of the schematics is done manually by reviewing all schematics pages."],
+      ["BOM", "Up to which level does the circuit diagram contain article information?", "3. The circuit diagram contains some article information (main parts) and is extended manually in parallel parts lists."],
+      ["BOM", "How is the bills of materials created and processed?", "3. The BOM is created automatically from CAE and manually processed and transfered to the ERP system."],
+      ["Reports", "How complete is the electrical documentation for production?", "3. Terminal diagrams, assembly diagrams etc. are prepared for production."],
+      ["Reports", "How is the production documentation generated?", "3. The production documentation is created partially automated by means of forms and templates."],
+      ["Cabinet design", "Which drawing & design method is used to create cabinet design and layout?", "3. The cabinet design is carried out graphically in 2D based on article information."],
+      ["Cabinet design", "In which detail and quality level does the customer create cabinet layout drawings?", "1. The cabinet design contains only the dimensions (construction plan)."],
     ],
   },
   {
-    title: "FTE profile",
-    fields: [
-      ["engineeringFte", "Engineering electrical FTE"],
-      ["engineeringRate", "Engineering hourly rate"],
-      ["productionFte", "Panel production FTE"],
-      ["productionRate", "Production hourly rate"],
-    ],
-  },
-  {
-    title: "Engineering status",
-    fields: [
-      ["etoCurrent", "ETO rate current"],
-      ["etoFuture", "ETO rate future"],
-    ],
-  },
-  {
-    title: "General",
-    fields: [
-      ["workingHoursPerDay", "Working hours / day"],
-      ["workingDaysPerYear", "Working days / year"],
+    section: "Panel Production Level Assessment",
+    items: [
+      ["Kitting", "How do you structure your bill of materials?", "2. BOM manual created"],
+      ["Panel Modification", "How are holes and cutouts made to the doors and mounting panels?", "1. Manual drilling and cutting according to each worker's own judgement"],
+      ["Labeling devices", "How do you create and apply the component labels?", "1. Labels are typed in manually from the schematic and printed out"],
+      ["Wire fabrication", "How do you fabricate the wires for your control panels?", "1. Manual fabrication during wiring"],
+      ["Mechanical installation", "Which method do you use to cut mounting rails, wire ducts and wire duct covers?", "1. Manual measuring and cutting according to each worker's own judgement"],
+      ["Devices installation", "What documents do you use in the manufacturing process?", "2. between 1 and 3"],
+      ["Terminal strip assembly", "How do you assemble your terminal strips?", "1. Terminals are manually identified, placed and labeled base on the schematic"],
+      ["Wiring", "What documents do you use for the wiring process?", "1. Schematic diagrams"],
     ],
   },
 ] as const;
@@ -326,9 +341,26 @@ export function Calculator() {
 
     setInput((current) => ({
       ...current,
-      [key]: Number.isFinite(nextValue) ? nextValue : current[key],
+      [key]: Number.isFinite(nextValue)
+        ? percentFields.includes(key)
+          ? nextValue / 100
+          : nextValue
+        : current[key],
     }));
   }
+
+  function displayValue(key: keyof Inputs) {
+    const value = input[key];
+
+    if (typeof value === "number" && percentFields.includes(key)) {
+      return String(value * 100);
+    }
+
+    return String(value);
+  }
+
+  const inputClass =
+    "h-11 rounded border border-[#cbd5e1] bg-white px-3 text-base shadow-inner outline-none transition focus:border-[#2563eb] focus:ring-2 focus:ring-[#bfdbfe]";
 
   return (
     <main className="min-h-screen bg-[#f6f7f9] text-[#1b1f24]">
@@ -336,16 +368,9 @@ export function Calculator() {
         <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#2563eb]">
-                Spreadsheet required fields
-              </p>
               <h1 className="mt-2 text-3xl font-semibold tracking-normal text-[#111827] sm:text-4xl">
                 ELA2 Usage Level Report Builder
               </h1>
-              <p className="mt-3 max-w-3xl text-base text-[#58606b]">
-                Enter the red cells from the General information tab, then review
-                the calculated report below.
-              </p>
             </div>
             <div className="rounded-md border border-[#e0e4e8] bg-[#fafafa] px-4 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.08)]">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#68707c]">
@@ -360,55 +385,158 @@ export function Calculator() {
       </section>
 
       <section className="mx-auto max-w-7xl px-5 py-6 sm:px-8">
-        <div className="grid gap-4 lg:grid-cols-4">
-          {fieldGroups.map((group) => (
-            <div
-              className="rounded-md border border-[#dde2e7] bg-white p-4 shadow-[0_14px_35px_rgba(15,23,42,0.08)]"
-              key={group.title}
-            >
-              <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#313842]">
-                {group.title}
-              </h2>
-              <div className="mt-4 grid gap-3">
-                {group.fields.map(([key, label]) => (
-                  <label className="grid gap-1" key={key}>
-                    <span className="text-sm font-medium text-[#4d5662]">
-                      {label}
-                    </span>
-                    <input
-                      className="h-11 rounded border border-[#cbd5e1] bg-white px-3 text-base shadow-inner outline-none transition focus:border-[#2563eb] focus:ring-2 focus:ring-[#bfdbfe]"
-                      inputMode="decimal"
-                      min="0"
-                      step={key.includes("Rate") || key.includes("Share") || key.includes("eto") ? "0.01" : "1"}
-                      type="text"
-                      value={String(input[key])}
-                      onChange={(event) => updateNumber(key, event.target.value)}
-                    />
-                  </label>
-                ))}
-              </div>
-            </div>
-          ))}
+        <div className="grid gap-4 lg:grid-cols-3">
           <div className="rounded-md border border-[#dde2e7] bg-white p-4 shadow-[0_14px_35px_rgba(15,23,42,0.08)]">
             <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#313842]">
-              Currency
+              Company profile
             </h2>
-            <label className="mt-4 grid gap-1">
-              <span className="text-sm font-medium text-[#4d5662]">Currency symbol</span>
-              <input
-                className="h-11 rounded border border-[#cbd5e1] bg-white px-3 text-base shadow-inner outline-none transition focus:border-[#2563eb] focus:ring-2 focus:ring-[#bfdbfe]"
-                value={input.currency}
-                onChange={(event) =>
-                  setInput((current) => ({
-                    ...current,
-                    currency: event.target.value,
-                  }))
-                }
+            <div className="mt-4 grid gap-4">
+              <div>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#64748b]">
+                  Company
+                </p>
+                <div className="grid gap-3">
+                  <label className="grid gap-1">
+                    <span className="text-sm font-medium text-[#4d5662]">
+                      Company name
+                    </span>
+                    <input className={inputClass} />
+                  </label>
+                  <label className="grid gap-1">
+                    <span className="text-sm font-medium text-[#4d5662]">
+                      Segment / industry
+                    </span>
+                    <input className={inputClass} />
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#64748b]">
+                  Engineering status
+                </p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Field
+                    label="ETO rate current"
+                    suffix="%"
+                    value={displayValue("etoCurrent")}
+                    onChange={(value) => updateNumber("etoCurrent", value)}
+                  />
+                  <Field
+                    label="ETO rate future"
+                    suffix="%"
+                    value={displayValue("etoFuture")}
+                    onChange={(value) => updateNumber("etoFuture", value)}
+                  />
+                </div>
+                <div className="mt-3 grid gap-2 rounded bg-[#f8fafc] p-3 text-sm text-[#4d5662]">
+                  <p>CTO current: {number((1 - input.etoCurrent) * 100, 0)}%</p>
+                  <p>CTO future: {number((1 - input.etoFuture) * 100, 0)}%</p>
+                </div>
+              </div>
+
+              <div>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#64748b]">
+                  General
+                </p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Field
+                    label="Working hours / day"
+                    value={displayValue("workingHoursPerDay")}
+                    onChange={(value) => updateNumber("workingHoursPerDay", value)}
+                  />
+                  <Field
+                    label="Working days / year"
+                    value={displayValue("workingDaysPerYear")}
+                    onChange={(value) => updateNumber("workingDaysPerYear", value)}
+                  />
+                </div>
+              </div>
+
+              <label className="grid gap-1">
+                <span className="text-sm font-medium text-[#4d5662]">
+                  Currency
+                </span>
+                <select
+                  className={inputClass}
+                  value={input.currency}
+                  onChange={(event) =>
+                    setInput((current) => ({
+                      ...current,
+                      currency: event.target.value,
+                    }))
+                  }
+                >
+                  {currencies.map(([symbol, label]) => (
+                    <option key={symbol} value={symbol}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <div className="rounded-md border border-[#dde2e7] bg-white p-4 shadow-[0_14px_35px_rgba(15,23,42,0.08)]">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#313842]">
+              FTE profile
+            </h2>
+            <div className="mt-4 grid gap-3">
+              <Field
+                label="Engineering electrical FTE"
+                value={displayValue("engineeringFte")}
+                onChange={(value) => updateNumber("engineeringFte", value)}
               />
-            </label>
-            <div className="mt-5 grid gap-2 rounded bg-[#f8fafc] p-3 text-sm text-[#4d5662]">
-              <p>CTO current: {number(1 - input.etoCurrent, 2)}</p>
-              <p>CTO future: {number(1 - input.etoFuture, 2)}</p>
+              <Field
+                label="Engineering hourly rate"
+                value={displayValue("engineeringRate")}
+                onChange={(value) => updateNumber("engineeringRate", value)}
+              />
+              <Field
+                label="Panel production FTE"
+                value={displayValue("productionFte")}
+                onChange={(value) => updateNumber("productionFte", value)}
+              />
+              <Field
+                label="Production hourly rate"
+                value={displayValue("productionRate")}
+                onChange={(value) => updateNumber("productionRate", value)}
+              />
+            </div>
+          </div>
+
+          <div className="rounded-md border border-[#dde2e7] bg-white p-4 shadow-[0_14px_35px_rgba(15,23,42,0.08)]">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#313842]">
+              Business output
+            </h2>
+            <div className="mt-4 grid gap-3">
+              <Field
+                label="Projects / year"
+                value={displayValue("projectsPerYear")}
+                onChange={(value) => updateNumber("projectsPerYear", value)}
+              />
+              <Field
+                label="Pages / project"
+                value={displayValue("pagesPerProject")}
+                onChange={(value) => updateNumber("pagesPerProject", value)}
+              />
+              <Field
+                label="Time share engineering"
+                suffix="%"
+                value={displayValue("engineeringTimeShare")}
+                onChange={(value) => updateNumber("engineeringTimeShare", value)}
+              />
+              <Field
+                label="Panels / year"
+                value={displayValue("panelsPerYear")}
+                onChange={(value) => updateNumber("panelsPerYear", value)}
+              />
+              <Field
+                label="Time share production"
+                suffix="%"
+                value={displayValue("productionTimeShare")}
+                onChange={(value) => updateNumber("productionTimeShare", value)}
+              />
             </div>
           </div>
         </div>
@@ -506,8 +634,44 @@ export function Calculator() {
             </div>
           ))}
         </div>
+
+        <QuestionnaireFaq />
       </section>
     </main>
+  );
+}
+
+function Field({
+  label,
+  onChange,
+  suffix,
+  value,
+}: {
+  label: string;
+  onChange: (value: string) => void;
+  suffix?: string;
+  value: string;
+}) {
+  return (
+    <label className="grid gap-1">
+      <span className="text-sm font-medium text-[#4d5662]">{label}</span>
+      <span className="relative block">
+        <input
+          className={`h-11 w-full rounded border border-[#cbd5e1] bg-white px-3 text-base shadow-inner outline-none transition focus:border-[#2563eb] focus:ring-2 focus:ring-[#bfdbfe] ${
+            suffix ? "pr-9" : ""
+          }`}
+          inputMode="decimal"
+          type="text"
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+        />
+        {suffix ? (
+          <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm font-semibold text-[#64748b]">
+            {suffix}
+          </span>
+        ) : null}
+      </span>
+    </label>
   );
 }
 
@@ -532,6 +696,46 @@ function ReportPanel({
         ))}
       </div>
     </div>
+  );
+}
+
+function QuestionnaireFaq() {
+  return (
+    <section className="mt-5 rounded-md border border-[#d6dce3] bg-white p-5 shadow-[0_14px_35px_rgba(15,23,42,0.08)]">
+      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#52606d]">
+        Questionnaire
+      </p>
+      <h2 className="mt-1 text-xl font-semibold text-[#111827]">
+        FAQ
+      </h2>
+      <div className="mt-5 grid gap-5 lg:grid-cols-2">
+        {questionnaireFaq.map((group) => (
+          <div key={group.section}>
+            <h3 className="rounded bg-[#28323f] px-4 py-3 text-sm font-semibold text-white">
+              {group.section}
+            </h3>
+            <div className="mt-3 grid gap-2">
+              {group.items.map(([category, question, answer]) => (
+                <details
+                  className="rounded border border-[#d6dce3] bg-[#fbfcfe] p-3"
+                  key={`${category}-${question}`}
+                >
+                  <summary className="cursor-pointer text-sm font-semibold text-[#111827]">
+                    {question}
+                  </summary>
+                  <p className="mt-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#64748b]">
+                    {category}
+                  </p>
+                  <p className="mt-1 text-sm leading-6 text-[#4d5662]">
+                    {answer}
+                  </p>
+                </details>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 
