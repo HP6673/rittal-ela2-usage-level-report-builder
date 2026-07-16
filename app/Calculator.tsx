@@ -188,7 +188,7 @@ function productionChartData(input: Inputs) {
     [0.018, 0.018, 0.018, 0.018, 0.018, 0.018, 0.018, 0.018, 0.018],
   ];
   const rateRatio =
-    input.productionRate === 0 ? 1 : input.engineeringRate / input.productionRate;
+    input.productionRate === 0 ? 0 : input.engineeringRate / input.productionRate;
   const article3d = [
     0,
     0.02 * rateRatio,
