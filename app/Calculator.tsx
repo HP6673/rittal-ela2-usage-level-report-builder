@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { workbookSheets } from "./workbookData";
 
 type Inputs = {
   projectsPerYear: number;
@@ -488,6 +487,8 @@ export function Calculator() {
           </div>
         </div>
 
+        <ReportPageTable report={report} currency={input.currency} />
+
         <div className="mt-5 grid gap-3 rounded-md border border-[#d6dce3] bg-white p-5 shadow-[0_14px_35px_rgba(15,23,42,0.08)] md:grid-cols-5">
           {[
             ["1", "Basic - AutoCAD LT"],
@@ -505,8 +506,6 @@ export function Calculator() {
             </div>
           ))}
         </div>
-
-        <WorkbookExplorer />
       </section>
     </main>
   );
@@ -599,8 +598,11 @@ function WorkbookChart({
       <div className="mt-5 h-72 overflow-x-auto">
         <div className="flex h-full min-w-[680px] items-end gap-3 border-l border-b border-[#d7dde5] px-3 pb-8">
           {data.labels.map((label, index) => {
-            const primaryHeight = (data.primary[index] / max) * 100;
-            const secondaryHeight = (data.secondary[index] / max) * 100;
+            const total = data.total[index];
+            const barHeight = (total / max) * 100;
+            const primaryHeight = total === 0 ? 0 : (data.primary[index] / total) * 100;
+            const secondaryHeight =
+              total === 0 ? 0 : (data.secondary[index] / total) * 100;
 
             return (
               <div className="relative flex h-full flex-1 flex-col justify-end" key={label}>
@@ -608,6 +610,7 @@ function WorkbookChart({
                   <div
                     className="mx-auto flex w-full max-w-9 flex-col justify-end overflow-hidden rounded-t-sm bg-[#e5e7eb]"
                     title={`${label}: ${(data.total[index] * 100).toFixed(1)}%`}
+                    style={{ height: `${barHeight}%` }}
                   >
                     <div
                       className="bg-[#f59e0b]"
@@ -631,59 +634,129 @@ function WorkbookChart({
   );
 }
 
-function WorkbookExplorer() {
-  const [activeSheet, setActiveSheet] = useState(workbookSheets[0]?.name ?? "");
-  const sheet =
-    workbookSheets.find((candidate) => candidate.name === activeSheet) ??
-    workbookSheets[0];
-
-  if (!sheet) {
-    return null;
-  }
-
+function ReportPageTable({
+  report,
+  currency,
+}: {
+  report: ReturnType<typeof calculate>;
+  currency: string;
+}) {
   return (
     <div className="mt-5 rounded-md border border-[#d6dce3] bg-white p-5 shadow-[0_14px_35px_rgba(15,23,42,0.08)]">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#52606d]">
-            Full workbook content
-          </p>
-          <h2 className="mt-1 text-xl font-semibold text-[#111827]">
-            Worksheet Browser
-          </h2>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {workbookSheets.map((candidate) => (
-            <button
-              className={`rounded border px-3 py-2 text-sm font-medium transition ${
-                candidate.name === sheet.name
-                  ? "border-[#2563eb] bg-[#eff6ff] text-[#1d4ed8]"
-                  : "border-[#d6dce3] bg-white text-[#52606d] hover:border-[#94a3b8]"
-              }`}
-              key={candidate.name}
-              type="button"
-              onClick={() => setActiveSheet(candidate.name)}
-            >
-              {candidate.name}
-            </button>
-          ))}
-        </div>
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#52606d]">
+          Report tab information
+        </p>
+        <h2 className="mt-1 text-xl font-semibold text-[#111827]">
+          Complete Report Page
+        </h2>
       </div>
 
       <div className="mt-5 overflow-auto rounded border border-[#d6dce3]">
         <table className="min-w-full border-collapse text-left text-sm">
+          <thead className="bg-[#f8fafc] text-xs uppercase tracking-[0.12em] text-[#52606d]">
+            <tr>
+              <th className="border-r border-[#d6dce3] px-3 py-3">Engineering Level Assessment</th>
+              <th className="border-r border-[#d6dce3] px-3 py-3">Value</th>
+              <th className="border-r border-[#d6dce3] px-3 py-3">Panel Production Level Assessment</th>
+              <th className="border-r border-[#d6dce3] px-3 py-3">Value</th>
+              <th className="px-3 py-3">Total</th>
+            </tr>
+          </thead>
           <tbody>
-            {sheet.rows.map((row) => (
-              <tr className="border-b border-[#edf0f3]" key={row.row}>
-                <th className="sticky left-0 z-10 border-r border-[#d6dce3] bg-[#f8fafc] px-3 py-2 text-xs font-semibold text-[#52606d]">
-                  {row.row}
-                </th>
-                {row.values.map((value, index) => (
+            {[
+              [
+                "Total pages per year",
+                report.totalPages.toLocaleString(),
+                "Total panels per year",
+                report.totalPanels.toLocaleString(),
+                "",
+              ],
+              [
+                "Engineering hours per year",
+                number(report.engineeringHours, 0),
+                "Production hours per year",
+                number(report.productionHours, 0),
+                "",
+              ],
+              [
+                "Engineering costs per year",
+                money(report.engineeringCost, currency),
+                "Production costs per year",
+                money(report.productionCost, currency),
+                "",
+              ],
+              [
+                "Time per page",
+                `${number(report.timePerPage, 3)} h`,
+                "Time per panel",
+                `${number(report.timePerPanel, 3)} h`,
+                "",
+              ],
+              [
+                "Saving potential ratio 10%",
+                money(report.engineeringSavings10, currency),
+                "Saving potential ratio 10%",
+                money(report.productionSavings10, currency),
+                "",
+              ],
+              [
+                "Saving potential ratio 20%",
+                money(report.engineeringSavings20, currency),
+                "Saving potential ratio 20%",
+                money(report.productionSavings20, currency),
+                "",
+              ],
+              [
+                "Saving potential ratio 30%",
+                money(report.engineeringSavings30, currency),
+                "Saving potential ratio 30%",
+                money(report.productionSavings30, currency),
+                "",
+              ],
+              [
+                "As Is Efficiency Level",
+                `${number(engineeringCurrentLevel, 2)} / ${number(report.engineeringAsIsRatio, 3)}`,
+                "As Is Efficiency Level",
+                `${number(productionCurrentLevel, 2)} / ${number(report.productionAsIsRatio, 3)}`,
+                "",
+              ],
+              [
+                "Target Efficiency Level",
+                `${number(engineeringTargetLevel, 2)} / ${number(report.engineeringTargetRatio, 3)}`,
+                "Target Efficiency Level",
+                `${number(productionTargetLevel, 2)} / ${number(report.productionTargetRatio, 3)}`,
+                "",
+              ],
+              [
+                "Difference",
+                number(report.engineeringDifference, 3),
+                "Difference",
+                number(report.productionDifference, 3),
+                "",
+              ],
+              [
+                "Saving potential engineering",
+                money(report.engineeringSavingPotential, currency),
+                "Saving potential production",
+                money(report.productionSavingPotential, currency),
+                money(
+                  report.engineeringSavingPotential + report.productionSavingPotential,
+                  currency,
+                ),
+              ],
+            ].map((row) => (
+              <tr className="border-b border-[#edf0f3]" key={row.join("-")}>
+                {row.map((value, index) => (
                   <td
-                    className="min-w-28 max-w-80 border-r border-[#edf0f3] px-3 py-2 align-top text-[#313842]"
-                    key={`${row.row}-${index}`}
+                    className={`border-r border-[#edf0f3] px-3 py-3 align-top ${
+                      index % 2 === 1 || index === 4
+                        ? "font-semibold text-[#111827]"
+                        : "text-[#52606d]"
+                    }`}
+                    key={`${row[0]}-${index}`}
                   >
-                    {formatCellValue(value)}
+                    {value}
                   </td>
                 ))}
               </tr>
@@ -693,18 +766,4 @@ function WorkbookExplorer() {
       </div>
     </div>
   );
-}
-
-function formatCellValue(value: string | number | null) {
-  if (value === null) {
-    return "";
-  }
-
-  if (typeof value === "number") {
-    return Math.abs(value) < 1 && value !== 0
-      ? number(value, 3)
-      : value.toLocaleString(undefined, { maximumFractionDigits: 3 });
-  }
-
-  return value;
 }
