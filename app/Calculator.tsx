@@ -199,6 +199,18 @@ function number(value: number, digits = 2) {
   });
 }
 
+function normalizeNumericInput(value: string) {
+  if (value === "") {
+    return 0;
+  }
+
+  const normalized = value
+    .replace(/^0+(?=\d)/, "")
+    .replace(/^(-?)0+(?=\d)/, "$1");
+
+  return Number(normalized);
+}
+
 const fieldGroups = [
   {
     title: "Business output",
@@ -242,20 +254,22 @@ export function Calculator() {
     report.engineeringSavingPotential + report.productionSavingPotential;
 
   function updateNumber(key: keyof Inputs, value: string) {
+    const nextValue = normalizeNumericInput(value);
+
     setInput((current) => ({
       ...current,
-      [key]: Number(value),
+      [key]: Number.isFinite(nextValue) ? nextValue : current[key],
     }));
   }
 
   return (
     <main className="min-h-screen bg-[#f6f7f9] text-[#1b1f24]">
-      <section className="border-b border-[#dfe3e8] bg-white">
+      <section className="border-b border-[#dfe3e8] bg-white shadow-[0_12px_30px_rgba(15,23,42,0.06)]">
         <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#b42318]">
-                Required fields
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#2563eb]">
+                Spreadsheet required fields
               </p>
               <h1 className="mt-2 text-3xl font-semibold tracking-normal text-[#111827] sm:text-4xl">
                 ELA2 Usage Level Report Builder
@@ -265,7 +279,7 @@ export function Calculator() {
                 the calculated report below.
               </p>
             </div>
-            <div className="rounded-md border border-[#e0e4e8] bg-[#fafafa] px-4 py-3">
+            <div className="rounded-md border border-[#e0e4e8] bg-[#fafafa] px-4 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.08)]">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#68707c]">
                 Total saving potential
               </p>
@@ -280,7 +294,10 @@ export function Calculator() {
       <section className="mx-auto max-w-7xl px-5 py-6 sm:px-8">
         <div className="grid gap-4 lg:grid-cols-4">
           {fieldGroups.map((group) => (
-            <div className="rounded-md border border-[#dde2e7] bg-white p-4" key={group.title}>
+            <div
+              className="rounded-md border border-[#dde2e7] bg-white p-4 shadow-[0_14px_35px_rgba(15,23,42,0.08)]"
+              key={group.title}
+            >
               <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#313842]">
                 {group.title}
               </h2>
@@ -291,11 +308,12 @@ export function Calculator() {
                       {label}
                     </span>
                     <input
-                      className="h-11 rounded border border-[#e5484d] bg-[#fff5f5] px-3 text-base outline-none transition focus:border-[#b42318] focus:ring-2 focus:ring-[#fecaca]"
+                      className="h-11 rounded border border-[#cbd5e1] bg-white px-3 text-base shadow-inner outline-none transition focus:border-[#2563eb] focus:ring-2 focus:ring-[#bfdbfe]"
+                      inputMode="decimal"
                       min="0"
                       step={key.includes("Rate") || key.includes("Share") || key.includes("eto") ? "0.01" : "1"}
-                      type="number"
-                      value={input[key]}
+                      type="text"
+                      value={String(input[key])}
                       onChange={(event) => updateNumber(key, event.target.value)}
                     />
                   </label>
@@ -303,14 +321,14 @@ export function Calculator() {
               </div>
             </div>
           ))}
-          <div className="rounded-md border border-[#dde2e7] bg-white p-4">
+          <div className="rounded-md border border-[#dde2e7] bg-white p-4 shadow-[0_14px_35px_rgba(15,23,42,0.08)]">
             <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#313842]">
               Currency
             </h2>
             <label className="mt-4 grid gap-1">
               <span className="text-sm font-medium text-[#4d5662]">Currency symbol</span>
               <input
-                className="h-11 rounded border border-[#e5484d] bg-[#fff5f5] px-3 text-base outline-none transition focus:border-[#b42318] focus:ring-2 focus:ring-[#fecaca]"
+                className="h-11 rounded border border-[#cbd5e1] bg-white px-3 text-base shadow-inner outline-none transition focus:border-[#2563eb] focus:ring-2 focus:ring-[#bfdbfe]"
                 value={input.currency}
                 onChange={(event) =>
                   setInput((current) => ({
@@ -354,7 +372,7 @@ export function Calculator() {
               ["Saving potential ratio 30%", money(report.productionSavings30, input.currency)],
             ]}
           />
-          <div className="rounded-md border border-[#1f2937] bg-[#111827] p-5 text-white">
+          <div className="rounded-md border border-[#1f2937] bg-[#111827] p-5 text-white shadow-[0_18px_45px_rgba(15,23,42,0.22)]">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#cbd5e1]">
               Total
             </p>
@@ -367,7 +385,7 @@ export function Calculator() {
           </div>
         </div>
 
-        <div className="mt-5 overflow-hidden rounded-md border border-[#d6dce3] bg-white">
+        <div className="mt-5 overflow-hidden rounded-md border border-[#d6dce3] bg-white shadow-[0_14px_35px_rgba(15,23,42,0.08)]">
           <div className="grid bg-[#28323f] text-sm font-semibold text-white md:grid-cols-2">
             <div className="border-b border-white/20 p-4 md:border-b-0 md:border-r">
               Result
@@ -396,7 +414,7 @@ export function Calculator() {
           </div>
         </div>
 
-        <div className="mt-5 grid gap-3 rounded-md border border-[#d6dce3] bg-white p-5 md:grid-cols-5">
+        <div className="mt-5 grid gap-3 rounded-md border border-[#d6dce3] bg-white p-5 shadow-[0_14px_35px_rgba(15,23,42,0.08)] md:grid-cols-5">
           {[
             ["1", "Basic - AutoCAD LT"],
             ["2", "Enhanced - ACE"],
@@ -404,7 +422,10 @@ export function Calculator() {
             ["4", "Automation - EPLAN eBuild"],
             ["5", "Configuration - EEC"],
           ].map(([level, label]) => (
-            <div className="rounded border border-[#e2e8f0] p-3" key={level}>
+            <div
+              className="rounded border border-[#e2e8f0] bg-white p-3 shadow-[0_8px_18px_rgba(15,23,42,0.05)]"
+              key={level}
+            >
               <p className="text-2xl font-semibold text-[#111827]">{level}</p>
               <p className="mt-1 text-sm text-[#56606c]">{label}</p>
             </div>
@@ -423,7 +444,7 @@ function ReportPanel({
   rows: [string, string][];
 }) {
   return (
-    <div className="overflow-hidden rounded-md border border-[#d6dce3] bg-white">
+    <div className="overflow-hidden rounded-md border border-[#d6dce3] bg-white shadow-[0_14px_35px_rgba(15,23,42,0.08)]">
       <h2 className="bg-[#eef2f6] px-4 py-3 text-base font-semibold text-[#111827]">
         {title}
       </h2>
