@@ -574,91 +574,12 @@ export function Calculator() {
       </section>
 
       <section className="mx-auto max-w-7xl px-5 pb-10 sm:px-8">
-        <div className="grid gap-5 xl:grid-cols-[1fr_1fr_0.7fr]">
-          <ReportPanel
-            title="Engineering Level Assessment"
-            rows={[
-              ["Total pages per year", report.totalPages.toLocaleString()],
-              ["Engineering hours per year", number(report.engineeringHours, 0)],
-              ["Engineering costs per year", money(report.engineeringCost, input.currency)],
-              ["Time per page", `${number(report.timePerPage, 3)} h`],
-              ["Saving potential ratio 10%", money(report.engineeringSavings10, input.currency)],
-              ["Saving potential ratio 20%", money(report.engineeringSavings20, input.currency)],
-              ["Saving potential ratio 30%", money(report.engineeringSavings30, input.currency)],
-            ]}
-          />
-          <ReportPanel
-            title="Panel Production Level Assessment"
-            rows={[
-              ["Total panels per year", report.totalPanels.toLocaleString()],
-              ["Production hours per year", number(report.productionHours, 0)],
-              ["Production costs per year", money(report.productionCost, input.currency)],
-              ["Time per panel", `${number(report.timePerPanel, 3)} h`],
-              ["Saving potential ratio 10%", money(report.productionSavings10, input.currency)],
-              ["Saving potential ratio 20%", money(report.productionSavings20, input.currency)],
-              ["Saving potential ratio 30%", money(report.productionSavings30, input.currency)],
-            ]}
-          />
-          <div className="rounded-md border border-[#1f2937] bg-[#111827] p-5 text-white shadow-[0_18px_45px_rgba(15,23,42,0.22)]">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#cbd5e1]">
-              Total
-            </p>
-            <p className="mt-2 text-4xl font-semibold">
-              {money(totalSaving, input.currency)}
-            </p>
-            <p className="mt-3 text-sm text-[#d8dee8]">
-              Engineering and production saving potential combined.
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-5 grid gap-5 lg:grid-cols-2">
+        <div className="grid gap-5 lg:grid-cols-2">
           <WorkbookChart title="Engineering time [%]" data={engineeringChart} />
           <WorkbookChart title="Production time [%]" data={productionChart} />
         </div>
 
-        <div className="mt-5 overflow-hidden rounded-md border border-[#d6dce3] bg-white shadow-[0_14px_35px_rgba(15,23,42,0.08)]">
-          <div className="grid bg-[#28323f] text-sm font-semibold text-white md:grid-cols-2">
-            <div className="border-b border-white/20 p-4 md:border-b-0 md:border-r">
-              Result
-            </div>
-            <div className="p-4">Efficiency Detail</div>
-          </div>
-          <div className="grid md:grid-cols-2">
-            <EfficiencyTable
-              title="Engineering"
-              rows={[
-                ["As Is Efficiency Level", number(engineeringCurrentLevel, 2), number(report.engineeringAsIsRatio, 3)],
-                ["Target Efficiency Level", number(engineeringTargetLevel, 2), number(report.engineeringTargetRatio, 3)],
-                ["Difference", "", number(report.engineeringDifference, 3)],
-                ["Saving potential engineering", money(report.engineeringSavingPotential, input.currency), ""],
-              ]}
-            />
-            <EfficiencyTable
-              title="Panel production"
-              rows={[
-                ["As Is Efficiency Level", number(productionCurrentLevel, 2), number(report.productionAsIsRatio, 3)],
-                ["Target Efficiency Level", number(productionTargetLevel, 2), number(report.productionTargetRatio, 3)],
-                ["Difference", "", number(report.productionDifference, 3)],
-                ["Saving potential production", money(report.productionSavingPotential, input.currency), ""],
-              ]}
-            />
-          </div>
-        </div>
-
         <ReportPageTable report={report} currency={input.currency} />
-
-        <div className="mt-5 grid gap-3 rounded-md border border-[#d6dce3] bg-white p-5 shadow-[0_14px_35px_rgba(15,23,42,0.08)] md:grid-cols-5">
-          {levelKey.map(([level, label]) => (
-            <div
-              className="rounded border border-[#e2e8f0] bg-white p-3 shadow-[0_8px_18px_rgba(15,23,42,0.05)]"
-              key={level}
-            >
-              <p className="text-2xl font-semibold text-[#111827]">{level}</p>
-              <p className="mt-1 text-sm text-[#56606c]">{label}</p>
-            </div>
-          ))}
-        </div>
 
         <QuestionnaireFaq />
       </section>
@@ -700,30 +621,6 @@ function Field({
   );
 }
 
-function ReportPanel({
-  title,
-  rows,
-}: {
-  title: string;
-  rows: [string, string][];
-}) {
-  return (
-    <div className="overflow-hidden rounded-md border border-[#d6dce3] bg-white shadow-[0_14px_35px_rgba(15,23,42,0.08)]">
-      <h2 className="bg-[#eef2f6] px-4 py-3 text-base font-semibold text-[#111827]">
-        {title}
-      </h2>
-      <div className="divide-y divide-[#edf0f3]">
-        {rows.map(([label, value]) => (
-          <div className="grid grid-cols-[1fr_auto] gap-4 px-4 py-3" key={label}>
-            <span className="text-sm text-[#52606d]">{label}</span>
-            <span className="text-sm font-semibold text-[#111827]">{value}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function QuestionnaireFaq() {
   return (
     <section className="mt-5 rounded-md border border-[#d6dce3] bg-white p-5 shadow-[0_14px_35px_rgba(15,23,42,0.08)]">
@@ -755,35 +652,6 @@ function QuestionnaireFaq() {
         ))}
       </div>
     </section>
-  );
-}
-
-function EfficiencyTable({
-  title,
-  rows,
-}: {
-  title: string;
-  rows: [string, string, string][];
-}) {
-  return (
-    <div className="border-t border-[#d6dce3] md:border-r md:border-t-0">
-      <h3 className="border-b border-[#d6dce3] bg-[#f8fafc] px-4 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-[#313842]">
-        {title}
-      </h3>
-      <div className="divide-y divide-[#edf0f3]">
-        {rows.map(([label, value, ratio]) => (
-          <div className="grid grid-cols-[1fr_90px_90px] gap-3 px-4 py-3" key={label}>
-            <span className="text-sm text-[#52606d]">{label}</span>
-            <span className="text-right text-sm font-semibold text-[#111827]">
-              {value}
-            </span>
-            <span className="text-right text-sm font-semibold text-[#111827]">
-              {ratio}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
   );
 }
 
