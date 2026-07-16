@@ -320,6 +320,15 @@ function normalizeNumericInput(value: string) {
   return Number(normalized);
 }
 
+function formatFaqAnswer(answer: string) {
+  const answerWithoutNumber = answer.replace(/^\d+\.\s*/, "").trim();
+  const punctuated = /[.!?]$/.test(answerWithoutNumber)
+    ? answerWithoutNumber
+    : `${answerWithoutNumber}.`;
+
+  return `The selected answer is "${punctuated}"`;
+}
+
 const percentFields: Array<keyof Inputs> = [
   "engineeringTimeShare",
   "productionTimeShare",
@@ -725,10 +734,7 @@ function ReportPanel({
 function QuestionnaireFaq() {
   return (
     <section className="mt-5 rounded-md border border-[#d6dce3] bg-white p-5 shadow-[0_14px_35px_rgba(15,23,42,0.08)]">
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#52606d]">
-        Questionnaire
-      </p>
-      <h2 className="mt-1 text-xl font-semibold text-[#111827]">
+      <h2 className="text-xl font-semibold text-[#111827]">
         FAQ
       </h2>
       <div className="mt-5 grid gap-5 lg:grid-cols-2">
@@ -738,19 +744,16 @@ function QuestionnaireFaq() {
               {group.section}
             </h3>
             <div className="mt-3 grid gap-2">
-              {group.items.map(([category, question, answer]) => (
+              {group.items.map(([, question, answer]) => (
                 <details
                   className="rounded border border-[#d6dce3] bg-[#fbfcfe] p-3"
-                  key={`${category}-${question}`}
+                  key={question}
                 >
                   <summary className="cursor-pointer text-sm font-semibold text-[#111827]">
                     {question}
                   </summary>
-                  <p className="mt-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#64748b]">
-                    {category}
-                  </p>
-                  <p className="mt-1 text-sm leading-6 text-[#4d5662]">
-                    {answer}
+                  <p className="mt-2 text-sm leading-6 text-[#4d5662]">
+                    {formatFaqAnswer(answer)}
                   </p>
                 </details>
               ))}
