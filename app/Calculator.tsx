@@ -44,7 +44,7 @@ const productionTargetLevel = 3.5;
 const avg = (...values: number[]) =>
   values.reduce((sum, value) => sum + value, 0) / values.length;
 
-const levelLabels = [
+const baseLevelLabels = [
   "1",
   "1.5",
   "2",
@@ -54,9 +54,9 @@ const levelLabels = [
   "4",
   "4.5",
   "5",
-  "As-is",
-  "Target",
 ];
+
+const yAxisTicks = [1, 0.75, 0.5, 0.25, 0];
 
 function interpolate(level: number, values: number[]) {
   const clamped = Math.max(1, Math.min(5, level));
@@ -67,6 +67,33 @@ function interpolate(level: number, values: number[]) {
   const ratio = (clamped - lowerLevel) / span;
 
   return values[lowerIndex] + (values[upperIndex] - values[lowerIndex]) * ratio;
+}
+
+function buildCalc2Lookup(baseValues: number[]) {
+  const denseValues: number[] = [];
+
+  for (let index = 0; index < baseValues.length - 1; index += 1) {
+    const end = baseValues[index + 1];
+    let current = baseValues[index];
+
+    denseValues.push(current);
+
+    for (let step = 1; step <= 4; step += 1) {
+      current = (current + end) / 2;
+      denseValues.push(current);
+    }
+  }
+
+  denseValues.push(baseValues[baseValues.length - 1]);
+  return denseValues;
+}
+
+function hlookupApprox(level: number, denseValues: number[]) {
+  const clamped = Math.max(1, Math.min(5, level));
+  const lookupLevel = Math.floor((clamped + 0.0000001) * 10) / 10;
+  const index = Math.round((lookupLevel - 1) * 10);
+
+  return denseValues[Math.max(0, Math.min(denseValues.length - 1, index))];
 }
 
 function engineeringChartData(input: Inputs) {
@@ -104,30 +131,39 @@ function engineeringChartData(input: Inputs) {
     rows.reduce((sum, row) => sum + row[index], 0),
   );
   const sum2 = [0, 0.03, 0.04, 0.05, 0.07, 0.07, 0.08, 0.09, 0.1];
+  const totalBase = sum1.map((value, index) => value + sum2[index]);
+  const denseEngineering = buildCalc2Lookup(sum1);
+  const denseStandardization = buildCalc2Lookup(sum2);
+  const denseTotal = buildCalc2Lookup(totalBase);
   const standardization = [
     ...sum2,
-    interpolate(engineeringCurrentLevel, sum2),
-    interpolate(engineeringTargetLevel, sum2),
+    hlookupApprox(engineeringCurrentLevel, denseStandardization),
+    hlookupApprox(engineeringTargetLevel, denseStandardization),
   ];
   const engineering = [
     ...sum1,
-    interpolate(engineeringCurrentLevel, sum1),
-    interpolate(engineeringTargetLevel, sum1),
+    hlookupApprox(engineeringCurrentLevel, denseEngineering),
+    hlookupApprox(engineeringTargetLevel, denseEngineering),
   ];
   const total = engineering.map((value, index) => value + standardization[index]);
 
   return {
-    labels: levelLabels,
+    labels: [
+      ...baseLevelLabels,
+      number(engineeringCurrentLevel, 2),
+      number(engineeringTargetLevel, 2),
+    ],
     primaryLabel: "Engineering",
     secondaryLabel: "Standardization",
     primary: engineering,
     secondary: standardization,
     total,
+    denseTotal,
   };
 }
 
 function engineeringEfficiencyValues(input: Inputs) {
-  return engineeringChartData(input).total;
+  return engineeringChartData(input).denseTotal;
 }
 
 function productionChartData(input: Inputs) {
@@ -176,19 +212,26 @@ function productionChartData(input: Inputs) {
   const totalLevelValues = production.map(
     (value, index) => value + standardization[index],
   );
+  const denseProduction = buildCalc2Lookup(production);
+  const denseStandardization = buildCalc2Lookup(standardization);
+  const denseTotal = buildCalc2Lookup(totalLevelValues);
   const productionWithMarkers = [
     ...production,
-    interpolate(productionCurrentLevel, production),
-    interpolate(productionTargetLevel, production),
+    hlookupApprox(productionCurrentLevel, denseProduction),
+    hlookupApprox(productionTargetLevel, denseProduction),
   ];
   const standardizationWithMarkers = [
     ...standardization,
-    interpolate(productionCurrentLevel, standardization),
-    interpolate(productionTargetLevel, standardization),
+    hlookupApprox(productionCurrentLevel, denseStandardization),
+    hlookupApprox(productionTargetLevel, denseStandardization),
   ];
 
   return {
-    labels: levelLabels,
+    labels: [
+      ...baseLevelLabels,
+      number(productionCurrentLevel, 2),
+      number(productionTargetLevel, 2),
+    ],
     primaryLabel: "Production",
     secondaryLabel: "Standardization",
     primary: productionWithMarkers,
@@ -196,12 +239,12 @@ function productionChartData(input: Inputs) {
     total: productionWithMarkers.map(
       (value, index) => value + standardizationWithMarkers[index],
     ),
-    levelTotals: totalLevelValues,
+    denseTotal,
   };
 }
 
 function productionEfficiencyValues(input: Inputs) {
-  return productionChartData(input).levelTotals;
+  return productionChartData(input).denseTotal;
 }
 
 function calculate(input: Inputs) {
@@ -221,10 +264,10 @@ function calculate(input: Inputs) {
 
   const engineeringValues = engineeringEfficiencyValues(input);
   const productionValues = productionEfficiencyValues(input);
-  const engineeringAsIsRatio = interpolate(engineeringCurrentLevel, engineeringValues);
-  const engineeringTargetRatio = interpolate(engineeringTargetLevel, engineeringValues);
-  const productionAsIsRatio = interpolate(productionCurrentLevel, productionValues);
-  const productionTargetRatio = interpolate(productionTargetLevel, productionValues);
+  const engineeringAsIsRatio = hlookupApprox(engineeringCurrentLevel, engineeringValues);
+  const engineeringTargetRatio = hlookupApprox(engineeringTargetLevel, engineeringValues);
+  const productionAsIsRatio = hlookupApprox(productionCurrentLevel, productionValues);
+  const productionTargetRatio = hlookupApprox(productionTargetLevel, productionValues);
   const engineeringDifference = engineeringAsIsRatio - engineeringTargetRatio;
   const productionDifference = productionAsIsRatio - productionTargetRatio;
 
@@ -780,12 +823,24 @@ function WorkbookChart({
     primary: number[];
     secondary: number[];
     total: number[];
+    denseTotal: number[];
   };
 }) {
+  const [tooltip, setTooltip] = useState<{
+    label: string;
+    primary: number;
+    secondary: number;
+    total: number;
+    x: number;
+    y: number;
+  } | null>(null);
   const max = Math.max(...data.total, 1);
 
   return (
-    <div className="rounded-md border border-[#d6dce3] bg-white p-5 shadow-[0_14px_35px_rgba(15,23,42,0.08)]">
+    <div
+      className="rounded-md border border-[#d6dce3] bg-white p-5 shadow-[0_14px_35px_rgba(15,23,42,0.08)]"
+      onMouseLeave={() => setTooltip(null)}
+    >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-base font-semibold text-[#111827]">{title}</h2>
         <div className="flex items-center gap-4 text-xs font-medium text-[#52606d]">
@@ -799,41 +854,108 @@ function WorkbookChart({
           </span>
         </div>
       </div>
-      <div className="mt-5 h-72 overflow-x-auto">
-        <div className="flex h-full min-w-[680px] items-end gap-3 border-l border-b border-[#d7dde5] px-3 pb-8">
-          {data.labels.map((label, index) => {
-            const total = data.total[index];
-            const barHeight = (total / max) * 100;
-            const primaryHeight = total === 0 ? 0 : (data.primary[index] / total) * 100;
-            const secondaryHeight =
-              total === 0 ? 0 : (data.secondary[index] / total) * 100;
+      <div className="mt-5 grid grid-cols-[42px_1fr] gap-3">
+        <div className="relative h-72">
+          {yAxisTicks.map((tick) => (
+            <span
+              className="absolute right-0 translate-y-1/2 text-xs tabular-nums text-[#52606d]"
+              key={tick}
+              style={{ bottom: `${tick * 100}%` }}
+            >
+              {Math.round(tick * 100)}%
+            </span>
+          ))}
+        </div>
+        <div className="h-72 overflow-x-auto overflow-y-visible">
+          <div className="relative h-full min-w-[680px] border-l border-b border-[#d7dde5] px-3 pb-8">
+            {yAxisTicks.map((tick) => (
+              <span
+                className="pointer-events-none absolute left-0 right-0 border-t border-dashed border-[#e2e8f0]"
+                key={tick}
+                style={{ bottom: `calc(${tick * 100}% + 2rem)` }}
+              />
+            ))}
+            <div className="relative z-10 flex h-full items-end gap-3">
+              {data.labels.map((label, index) => {
+                const total = data.total[index];
+                const barHeight = (total / max) * 100;
+                const primaryHeight =
+                  total === 0 ? 0 : (data.primary[index] / total) * 100;
+                const secondaryHeight =
+                  total === 0 ? 0 : (data.secondary[index] / total) * 100;
 
-            return (
-              <div className="relative flex h-full flex-1 flex-col justify-end" key={label}>
-                <div className="flex h-[88%] items-end">
+                return (
                   <div
-                    className="mx-auto flex w-full max-w-9 flex-col justify-end overflow-hidden rounded-t-sm bg-[#e5e7eb]"
-                    title={`${label}: ${(data.total[index] * 100).toFixed(1)}%`}
-                    style={{ height: `${barHeight}%` }}
+                    className="relative flex h-full flex-1 flex-col justify-end"
+                    key={label}
+                    onMouseMove={(event) =>
+                      setTooltip({
+                        label,
+                        primary: data.primary[index],
+                        secondary: data.secondary[index],
+                        total,
+                        x: event.clientX,
+                        y: event.clientY,
+                      })
+                    }
                   >
-                    <div
-                      className="bg-[#f59e0b]"
-                      style={{ height: `${secondaryHeight}%` }}
-                    />
-                    <div
-                      className="bg-[#2563eb]"
-                      style={{ height: `${primaryHeight}%` }}
-                    />
+                    <div className="flex h-[88%] items-end">
+                      <div
+                        className="mx-auto flex w-full max-w-9 flex-col justify-end overflow-hidden rounded-t-sm bg-[#e5e7eb]"
+                        style={{ height: `${barHeight}%` }}
+                      >
+                        <div
+                          className="bg-[#f59e0b]"
+                          style={{ height: `${secondaryHeight}%` }}
+                        />
+                        <div
+                          className="bg-[#2563eb]"
+                          style={{ height: `${primaryHeight}%` }}
+                        />
+                      </div>
+                    </div>
+                    <span className="absolute -bottom-7 left-1/2 w-12 -translate-x-1/2 text-center text-xs text-[#52606d]">
+                      {label}
+                    </span>
                   </div>
-                </div>
-                <span className="absolute -bottom-7 left-1/2 w-12 -translate-x-1/2 text-center text-xs text-[#52606d]">
-                  {label}
-                </span>
-              </div>
-            );
-          })}
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
+      {tooltip ? (
+        <div
+          className="fixed z-[9999] min-w-56 rounded-md border border-[#111827] bg-white p-3 text-sm shadow-[0_20px_55px_rgba(15,23,42,0.28)]"
+          style={{
+            left: tooltip.x,
+            top: tooltip.y,
+            transform: "translate(-50%, calc(-100% - 16px))",
+          }}
+        >
+          <p className="font-semibold text-[#111827]">Level {tooltip.label}</p>
+          <div className="mt-2 grid gap-1 text-[#4d5662]">
+            <p>
+              {data.primaryLabel}:{" "}
+              <span className="font-semibold text-[#111827]">
+                {number(tooltip.primary * 100, 1)}%
+              </span>
+            </p>
+            <p>
+              {data.secondaryLabel}:{" "}
+              <span className="font-semibold text-[#111827]">
+                {number(tooltip.secondary * 100, 1)}%
+              </span>
+            </p>
+            <p>
+              Total:{" "}
+              <span className="font-semibold text-[#111827]">
+                {number(tooltip.total * 100, 1)}%
+              </span>
+            </p>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
