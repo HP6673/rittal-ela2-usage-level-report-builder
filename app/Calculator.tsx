@@ -123,21 +123,36 @@ export function Calculator() {
       return;
     }
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+    // The step nav's "active" pill tracks whichever section's top edge has
+    // scrolled up past the sticky header — the last one to have crossed
+    // that line is the one currently in view. Recomputed from scratch on
+    // every scroll (not an IntersectionObserver diff), since with sections
+    // this tall an observer only reports the *changed* entries — there's a
+    // scroll range where the outgoing section's "no longer intersecting"
+    // event arrives alone, gets filtered out, and the active step never
+    // advances past it.
+    const referenceLine = 112;
 
-        if (visible[0]) {
-          setActiveStep(visible[0].target.id);
+    function updateActiveStep() {
+      let current = sections[0];
+
+      for (const section of sections) {
+        if (section.getBoundingClientRect().top <= referenceLine) {
+          current = section;
         }
-      },
-      { rootMargin: "-112px 0px -70% 0px", threshold: 0 },
-    );
+      }
 
-    sections.forEach((section) => observer.observe(section));
-    return () => observer.disconnect();
+      setActiveStep(current.id);
+    }
+
+    updateActiveStep();
+    window.addEventListener("scroll", updateActiveStep, { passive: true });
+    window.addEventListener("resize", updateActiveStep);
+
+    return () => {
+      window.removeEventListener("scroll", updateActiveStep);
+      window.removeEventListener("resize", updateActiveStep);
+    };
   }, []);
 
   const report = useMemo(() => calculate(input), [input]);
