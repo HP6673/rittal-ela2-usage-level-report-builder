@@ -301,10 +301,10 @@ export function Calculator() {
             return (
               <a
                 aria-current={active ? "step" : undefined}
-                className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c8102e] ${
+                className={`shrink-0 whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c8102e] ${
                   active
-                    ? "bg-[#c8102e] text-white"
-                    : "bg-[#f1f3f5] text-[#4d5662] hover:bg-[#e5e7eb]"
+                    ? "bg-white text-[#c8102e] shadow-[0_2px_10px_rgba(200,16,46,0.35)]"
+                    : "bg-transparent text-[#4d5662] hover:text-[#c8102e] hover:shadow-[0_1px_6px_rgba(15,23,42,0.12)]"
                 }`}
                 href={`#${step.id}`}
                 key={step.id}
