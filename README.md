@@ -1,8 +1,6 @@
-# vinext-starter
+# Rittal ELA2 Usage Level Report Builder
 
-A clean full-stack starter running on
-[vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
-Drizzle support.
+A React/Vinext app for generating the ELA2 usage level report.
 
 ## Prerequisites
 
@@ -11,18 +9,30 @@ Drizzle support.
 ## Quick Start
 
 ```bash
-npm install
-npm run dev
-npm run build
+pnpm install
+pnpm run dev
+pnpm run build
 ```
 
-This starter does not use `wrangler.jsonc`.
+## Cloudflare Deploy Settings
+
+Use these settings in Cloudflare Workers & Pages:
+
+```text
+Build command: pnpm run build
+Deploy command: pnpm exec wrangler deploy
+Non-production branch deploy command: pnpm exec wrangler versions upload
+Root directory: /
+```
+
+Upload the project source to GitHub, but do not upload `node_modules` or `dist`.
 
 ## Included Shape
 
 - edit site code under `app/`
-- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
-- `vite.config.ts` simulates declared bindings for local development
+- `.openai/hosting.json` can declare optional Sites D1 and R2 bindings
+- `vite.config.ts` simulates declared bindings for local development and falls
+  back cleanly when `.openai/hosting.json` is not present
 - `db/schema.ts` starts intentionally empty
 - `examples/d1/` contains an optional D1 example surface
 - `drizzle.config.ts` supports local migration generation when needed
@@ -87,10 +97,10 @@ actions tied to the current ChatGPT user. Leave public content anonymous.
 
 ## Useful Commands
 
-- `npm run dev`: start local development
-- `npm run build`: verify the vinext build output
-- `npm test`: build the starter and verify its rendered loading skeleton
-- `npm run db:generate`: generate Drizzle migrations after schema changes
+- `pnpm run dev`: start local development
+- `pnpm run build`: verify the vinext build output
+- `pnpm test`: build and verify rendered output
+- `pnpm run db:generate`: generate Drizzle migrations after schema changes
 
 ## Learn More
 
