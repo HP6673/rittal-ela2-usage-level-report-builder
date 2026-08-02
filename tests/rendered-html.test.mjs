@@ -38,7 +38,7 @@ test("server-renders the ELA2 report builder with workbook defaults applied", as
   assert.match(html, /Panel production questionnaire/i);
   assert.match(html, /Results\s*(&|&amp;)\s*savings/i);
   assert.match(html, /Recommended offering/i);
-  assert.match(html, /Print \/ export report/i);
+  assert.match(html, />Export report</i);
   assert.match(html, /Improvements to engineering/i);
   assert.match(html, /Improvements to production/i);
   assert.match(html, /rittal-logo\.png/);
@@ -82,9 +82,97 @@ test("server-renders the ELA2 report builder with workbook defaults applied", as
   assert.match(html, /Possible future improvement[\s\S]{0,40}\d+/i);
   assert.match(html, /Should already be available\/implemented[\s\S]{0,40}\d+/i);
 
-  // Requirement #16 — reset/clear actions must exist.
-  assert.match(html, /Reset to workbook defaults/i);
+  // Requirement #16 — the assessment-clearing action must exist.
   assert.match(html, /Clear assessment/i);
+
+  // The export/print report modal is client-state-gated (starts closed, to
+  // match the SSR markup and avoid a hydration mismatch) — its content must
+  // not leak into the default page render. It's checked directly against
+  // app/components/PrintReport.tsx in the "export report" test below.
+  assert.doesNotMatch(html, /Back to editor/i);
+  assert.doesNotMatch(html, /Print \/ Save as PDF/i);
+  assert.doesNotMatch(html, /Export preview/i);
+});
+
+test("export report: dedicated preview covers every required section and hides raw form controls", async () => {
+  const printReport = await readFile(
+    new URL("../app/components/PrintReport.tsx", import.meta.url),
+    "utf8",
+  );
+
+  // Requirement #1 — an explicit "Export report" trigger, not window.print()
+  // firing automatically; requirement #9 — Print/Back actions inside the
+  // preview itself.
+  assert.match(printReport, /Print \/ Save as PDF/);
+  assert.match(printReport, /Back to editor/);
+  assert.match(printReport, /onClick=\{\(\) => window\.print\(\)\}/);
+
+  // Requirement #2 — cover/header content.
+  assert.match(printReport, /rittal-logo\.png/);
+  assert.match(printReport, /ELA2 Usage Level Report/);
+  assert.match(printReport, /input\.companyName/);
+  assert.match(printReport, /input\.segmentIndustry/);
+  assert.match(printReport, /generatedAt/);
+  assert.match(printReport, /moneyWithCents\(totalSaving/);
+  assert.match(printReport, /engineeringCurrentLevel.*engineeringTargetLevel|engineeringTargetLevel.*engineeringCurrentLevel/s);
+  assert.match(printReport, /productionCurrentLevel.*productionTargetLevel|productionTargetLevel.*productionCurrentLevel/s);
+
+  // Requirement #3 — executive summary.
+  assert.match(printReport, /Executive summary/);
+  assert.match(printReport, /Main maturity gap/);
+  assert.match(printReport, /Recommendations to be offered/);
+
+  // Requirement #4 — key assumptions / input summary.
+  assert.match(printReport, /Key assumptions/);
+  assert.match(printReport, /Projects \/ year/);
+  assert.match(printReport, /Pages \/ project/);
+  assert.match(printReport, /Panels \/ year/);
+  assert.match(printReport, /ETO current \/ future/);
+  assert.match(printReport, /Working hours \/ day/);
+  assert.match(printReport, /Working days \/ year/);
+
+  // Requirement #5 — results section (engineering/production/total).
+  assert.match(printReport, /Engineering results/);
+  assert.match(printReport, /Production results/);
+  assert.match(printReport, /Total result/);
+
+  // Requirement #6 — chart summaries with clear As-is/Target labeling.
+  assert.match(printReport, /Usage level charts/);
+  assert.match(printReport, /"As-is"/);
+  assert.match(printReport, /"Target"/);
+
+  // Requirement #7 — recommendations default to "to be offered" only, with
+  // "possible future improvement" as a separate appendix; "should already be
+  // available" is excluded from the client-facing report entirely.
+  assert.match(printReport, /Recommended offering/);
+  assert.match(printReport, /Appendix: possible future improvements/);
+  assert.match(printReport, /toBeOffered/);
+  assert.match(printReport, /futureImprovements/);
+  assert.doesNotMatch(printReport, /Should already be available/);
+
+  // Requirement #12 — the export view must not render the interactive
+  // questionnaire (no radio inputs / score selectors).
+  assert.doesNotMatch(printReport, /type="radio"/);
+  assert.doesNotMatch(printReport, /QuestionnaireSection/);
+
+  // Requirement #8 — print CSS: colors preserved, sensible PDF margins.
+  const globalsCss = await readFile(
+    new URL("../app/globals.css", import.meta.url),
+    "utf8",
+  );
+  assert.match(globalsCss, /@media print/);
+  assert.match(globalsCss, /@page/);
+  assert.match(globalsCss, /print-color-adjust:\s*exact/);
+
+  // Requirement #8/#9 — printing hides the interactive dashboard (nav,
+  // header, form controls) and the preview's own on-screen-only chrome.
+  const calculator = await readFile(
+    new URL("../app/Calculator.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(calculator, /<header className="[^"]*print:hidden/);
+  assert.match(calculator, /aria-label="Report sections"[\s\S]{0,160}print:hidden/);
+  assert.match(printReport, /sticky top-0 z-10[\s\S]{0,160}print:hidden/);
 });
 
 test("keeps deployment metadata and source aligned", async () => {

@@ -27,7 +27,8 @@ import {
 } from "./components/QuestionnaireSection.tsx";
 import { ReportSummarySection } from "./components/ReportSummary.tsx";
 import { RecommendationsSection } from "./components/Recommendations.tsx";
-import { PrintReportSection } from "./components/PrintReport.tsx";
+import { ExportReportModal } from "./components/PrintReport.tsx";
+import { SectionCard } from "./components/ui.tsx";
 
 const STORAGE_KEY = "rittal-ela2-report-builder:v1";
 
@@ -68,6 +69,7 @@ export function Calculator() {
     null,
   );
   const [activeStep, setActiveStep] = useState("step-1");
+  const [showExportPreview, setShowExportPreview] = useState(false);
   const loadedRef = useRef(false);
 
   // Requirement #16 — restore a returning visitor's entries. Deliberately a
@@ -232,11 +234,6 @@ export function Calculator() {
     }));
   }
 
-  function resetToDefaults() {
-    setInput(defaults);
-    setFieldNotice(null);
-  }
-
   function clearAssessment() {
     setInput((current) => ({
       ...current,
@@ -293,11 +290,11 @@ export function Calculator() {
                   Clear assessment
                 </button>
                 <button
-                  className="h-10 rounded-md border border-[#d6dce3] bg-white px-3 text-xs font-semibold text-[#4d5662] transition hover:bg-[#f8fafc] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c8102e]"
-                  onClick={resetToDefaults}
+                  className="h-10 rounded-md bg-[#c8102e] px-3 text-xs font-semibold text-white shadow-[0_10px_24px_rgba(200,16,46,0.25)] transition hover:bg-[#a80d26] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a80d26]"
+                  onClick={() => setShowExportPreview(true)}
                   type="button"
                 >
-                  Reset to workbook defaults
+                  Export report
                 </button>
               </div>
             </div>
@@ -342,7 +339,7 @@ export function Calculator() {
         </div>
       ) : null}
 
-      <div className="mx-auto grid max-w-7xl gap-5 px-4 py-6 sm:px-8 print:gap-0 print:px-0 print:py-0">
+      <div className="mx-auto grid max-w-7xl gap-5 px-4 py-6 sm:px-8 print:hidden">
         <InputSection
           displayValue={displayValue}
           fieldError={fieldError}
@@ -385,8 +382,31 @@ export function Calculator() {
           productionTargetLevel={report.productionTargetLevel}
         />
 
-        <PrintReportSection input={input} onPrint={() => window.print()} report={report} />
+        <SectionCard
+          description="Generate a polished, client-ready PDF of this assessment — cover page, executive summary, results, charts, and recommendations. This does not print the working dashboard."
+          id="step-6"
+          step={6}
+          title="Export report"
+        >
+          <button
+            className="h-11 rounded-md bg-[#c8102e] px-5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(200,16,46,0.25)] transition hover:bg-[#a80d26]"
+            onClick={() => setShowExportPreview(true)}
+            type="button"
+          >
+            Export report
+          </button>
+        </SectionCard>
       </div>
+
+      {showExportPreview ? (
+        <ExportReportModal
+          engineeringChart={engineeringChart}
+          input={input}
+          onClose={() => setShowExportPreview(false)}
+          productionChart={productionChart}
+          report={report}
+        />
+      ) : null}
     </main>
   );
 }

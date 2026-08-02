@@ -24,3 +24,18 @@ select,
 textarea {
   font: inherit;
 }
+
+@media print {
+  @page {
+    margin: 0.5in;
+    size: auto;
+  }
+
+  /* Chrome/Firefox strip background colors by default when printing —
+     without this, the report's red/gray accents and status badges would
+     print as plain black-on-white. */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
