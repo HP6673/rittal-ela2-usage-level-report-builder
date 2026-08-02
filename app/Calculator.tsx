@@ -311,16 +311,15 @@ export function Calculator() {
       >
         <div className="mx-auto flex max-w-7xl gap-1.5 overflow-x-auto px-4 py-2 sm:px-8">
           {steps.map((step, index) => {
+            // `activeStep` still drives `aria-current` for screen readers,
+            // but the red/shadow look is deliberately hover/focus-only —
+            // it should never look "selected" just from scrolling past it.
             const active = activeStep === step.id;
 
             return (
               <a
                 aria-current={active ? "step" : undefined}
-                className={`shrink-0 whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c8102e] ${
-                  active
-                    ? "bg-white text-[#c8102e] shadow-[0_2px_10px_rgba(200,16,46,0.35)]"
-                    : "bg-transparent text-[#4d5662] hover:text-[#c8102e] hover:shadow-[0_1px_6px_rgba(15,23,42,0.12)]"
-                }`}
+                className="shrink-0 whitespace-nowrap rounded-md bg-transparent px-3 py-1.5 text-xs font-semibold text-[#4d5662] transition hover:text-[#c8102e] hover:shadow-[0_2px_10px_rgba(200,16,46,0.35)] focus-visible:text-[#c8102e] focus-visible:shadow-[0_2px_10px_rgba(200,16,46,0.35)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c8102e]"
                 href={`#${step.id}`}
                 key={step.id}
               >
