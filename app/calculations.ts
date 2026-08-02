@@ -85,20 +85,22 @@ export const defaultProductionAnswers: ProductionAnswers = {
   q18: 1,
 };
 
+// Matches the workbook's `General information` sheet defaults (I2:I6, E3:E4,
+// F3:F4, B6/C6, B21:B23).
 export const defaults: Inputs = {
-  projectsPerYear: 0,
-  pagesPerProject: 0,
-  engineeringTimeShare: 0,
-  panelsPerYear: 0,
-  productionTimeShare: 0,
-  engineeringFte: 0,
-  engineeringRate: 0,
-  productionFte: 0,
-  productionRate: 0,
-  etoCurrent: 0,
-  etoFuture: 0,
-  workingHoursPerDay: 0,
-  workingDaysPerYear: 0,
+  projectsPerYear: 50,
+  pagesPerProject: 100,
+  engineeringTimeShare: 1,
+  panelsPerYear: 100,
+  productionTimeShare: 1,
+  engineeringFte: 2,
+  engineeringRate: 75,
+  productionFte: 4,
+  productionRate: 40,
+  etoCurrent: 0.8,
+  etoFuture: 0.3,
+  workingHoursPerDay: 8,
+  workingDaysPerYear: 235,
   currency: "$",
   engineeringAnswers: defaultEngineeringAnswers,
   productionAnswers: defaultProductionAnswers,
@@ -245,11 +247,9 @@ export function engineeringChartData(input: Inputs) {
   const total = engineering.map((value, index) => value + standardization[index]);
 
   return {
-    labels: [
-      ...baseLevelLabels,
-      number(currentLevel, 2),
-      number(targetLevel, 2),
-    ],
+    labels: [...baseLevelLabels, "As-is", "Target"],
+    currentLevel,
+    targetLevel,
     primaryLabel: "Engineering",
     secondaryLabel: "Standardization",
     primary: engineering,
@@ -326,11 +326,9 @@ export function productionChartData(input: Inputs) {
   ];
 
   return {
-    labels: [
-      ...baseLevelLabels,
-      number(currentLevel, 2),
-      number(targetLevel, 2),
-    ],
+    labels: [...baseLevelLabels, "As-is", "Target"],
+    currentLevel,
+    targetLevel,
     primaryLabel: "Production",
     secondaryLabel: "Standardization",
     primary: productionWithMarkers,
@@ -436,6 +434,14 @@ export function normalizeNumericInput(value: string) {
 
 export type QuestionOption = { value: number; label: string };
 
+// Menus!A2:Y2 — every question list starts with this placeholder before an
+// answer has been chosen.
+const unselectedOption: QuestionOption = { value: 0, label: "0. Select value" };
+
+function withUnselected(options: QuestionOption[]): QuestionOption[] {
+  return [unselectedOption, ...options];
+}
+
 export type QuestionDefinition<K extends string> = {
   id: K;
   prompt: string;
@@ -450,13 +456,13 @@ export type SectionDefinition<K extends string> = {
 
 // Menus!D2:G7 — identical option set shared by the 4 "Delivery specifications"
 // sub-questions.
-const genericRequirementOptions: QuestionOption[] = [
+const genericRequirementOptions: QuestionOption[] = withUnselected([
   { value: 1, label: "Changes in requirements are processed manual." },
   { value: 2, label: "between 1 and 3" },
   { value: 3, label: "Templates and structures take into account the some variance in requirements." },
   { value: 4, label: "between 3 and 5" },
   { value: 5, label: "Automation allows to switch between different requirements." },
-];
+]);
 
 export const engineeringSections: SectionDefinition<keyof EngineeringAnswers>[] = [
   {
@@ -466,35 +472,35 @@ export const engineeringSections: SectionDefinition<keyof EngineeringAnswers>[] 
       {
         id: "q1a",
         prompt: "How does the customer and order data reach the design department?",
-        options: [
+        options: withUnselected([
           { value: 1, label: "Order data and requirements are transferred unstructured and mainly in paper. Supported by various meetings." },
           { value: 2, label: "between 1 and 3" },
           { value: 3, label: "Order data and requirements are transferred based on existing templates (checklists, templates, option and variant lists, tables, etc.)." },
           { value: 4, label: "between 3 and 5" },
           { value: 5, label: "Order data and requirements are gathered by a system (e.g. sales configurator) and automatically transferred to the design department." },
-        ],
+        ]),
       },
       {
         id: "q1b",
         prompt: "How is the order data and requirements handled in the design department?",
-        options: [
+        options: withUnselected([
           { value: 1, label: "The storage of order data and requirements is mainly digital but not reusable (e.g. scanned documents, sketches, PDF)." },
           { value: 2, label: "between 1 and 3" },
           { value: 3, label: "The storage of order data and requirements is mainly digital and reusable (e.g. Excel spreadsheet and templates)." },
           { value: 4, label: "between 3 and 5" },
           { value: 5, label: "The storage of order data and requirements is fully digital and adapted for further usage (e.g. structured documentation in PDM system)." },
-        ],
+        ]),
       },
       {
         id: "q1c",
         prompt: "Does the order data transferred to the design department contains a sensor-actuator lists?",
-        options: [
+        options: withUnselected([
           { value: 1, label: "The design department does not receive a sensor-actuator list." },
           { value: 2, label: "between 1 and 3" },
           { value: 3, label: "The design department receives preliminairy sensor-actuator list." },
           { value: 4, label: "between 3 and 5" },
           { value: 5, label: "The design department receives detailed sensor-actuator lists, which can be further processed automatically." },
-        ],
+        ]),
       },
     ],
   },
@@ -515,13 +521,13 @@ export const engineeringSections: SectionDefinition<keyof EngineeringAnswers>[] 
       {
         id: "q3a",
         prompt: "How are new technical solutions (ETO) developed?",
-        options: [
+        options: withUnselected([
           { value: 1, label: "New technical solutions are designed in a manual process (e.g. based on sketches)." },
           { value: 2, label: "between 1 and 3" },
           { value: 3, label: "New technical solutions are designed in a digital process." },
           { value: 4, label: "between 3 and 5" },
           { value: 5, label: "New technical solutions are designed in a digital process and new design is evaluated in order to extend existing standard." },
-        ],
+        ]),
       },
     ],
   },
@@ -532,13 +538,13 @@ export const engineeringSections: SectionDefinition<keyof EngineeringAnswers>[] 
       {
         id: "q4a",
         prompt: "How are circuit diagrams created?",
-        options: [
+        options: withUnselected([
           { value: 1, label: "The circuit diagrams are created manually by placing graphical symbols or partial circuits (e.g. copy and paste)." },
           { value: 2, label: "between 1 and 3" },
           { value: 3, label: "The circuit diagrams are created based on a central macro library with product functions and stored data tables." },
           { value: 4, label: "between 3 and 5" },
           { value: 5, label: "The circuit diagrams are mainly generated automaticly based on a connection with a configurator." },
-        ],
+        ]),
       },
     ],
   },
@@ -549,13 +555,13 @@ export const engineeringSections: SectionDefinition<keyof EngineeringAnswers>[] 
       {
         id: "q5a",
         prompt: "How are circuit diagrams verified after creation?",
-        options: [
+        options: withUnselected([
           { value: 1, label: "The verification of the schematics is done manually by reviewing all schematics pages." },
           { value: 2, label: "between 1 and 3" },
           { value: 3, label: "The check of the circuit diagrams is done by automated mass controls and corrections (checking page cross-references)." },
           { value: 4, label: "between 3 and 5" },
           { value: 5, label: "The functional checks of the circuit diagrams are almost completely eliminated (e.g. generation)." },
-        ],
+        ]),
       },
     ],
   },
@@ -566,24 +572,24 @@ export const engineeringSections: SectionDefinition<keyof EngineeringAnswers>[] 
       {
         id: "q6a",
         prompt: "Up to which level does the circuit diagram contain article information?",
-        options: [
+        options: withUnselected([
           { value: 1, label: "The circuit diagram doesn't contain article information, the BOM is created manual in a separate list." },
           { value: 2, label: "between 1 and 3" },
           { value: 3, label: "The circuit diagram contains some article information (main parts) and is extended manually in parallel parts lists." },
           { value: 4, label: "between 3 and 5" },
           { value: 5, label: "The circuit diagram containts full article information and a detailled and structured BOM can be exported." },
-        ],
+        ]),
       },
       {
         id: "q6b",
         prompt: "How is the bills of materials created and processed?",
-        options: [
+        options: withUnselected([
           { value: 1, label: "The BOM is created and processed manually." },
           { value: 2, label: "between 1 and 3" },
           { value: 3, label: "The BOM is created automatically from CAE and manually processed and transfered to the ERP system." },
           { value: 4, label: "between 3 and 5" },
           { value: 5, label: "The BOM is created automatically from CAE and automaticlly processed and transfered to the ERP system." },
-        ],
+        ]),
       },
     ],
   },
@@ -594,24 +600,24 @@ export const engineeringSections: SectionDefinition<keyof EngineeringAnswers>[] 
       {
         id: "q7a",
         prompt: "How complete is the electrical documentation for production?",
-        options: [
+        options: withUnselected([
           { value: 1, label: "Only the circuit diagram is supplied to production." },
           { value: 2, label: "between 1 and 3" },
           { value: 3, label: "Terminal diagrams, assembly diagrams etc. are prepared for production." },
           { value: 4, label: "between 3 and 5" },
           { value: 5, label: "Complete wiring lists with ready-made wires are created for production." },
-        ],
+        ]),
       },
       {
         id: "q7b",
         prompt: "How is the production documentation generated?",
-        options: [
+        options: withUnselected([
           { value: 1, label: "The production documentation is created manually." },
           { value: 2, label: "between 1 and 3" },
           { value: 3, label: "The production documentation is created partially automated by means of forms and templates." },
           { value: 4, label: "between 3 and 5" },
           { value: 5, label: "The production documentation is automatically created and stored in a ERP/PDM system." },
-        ],
+        ]),
       },
     ],
   },
@@ -622,24 +628,24 @@ export const engineeringSections: SectionDefinition<keyof EngineeringAnswers>[] 
       {
         id: "q8a",
         prompt: "Which drawing & design method is used to create cabinet design and layout?",
-        options: [
+        options: withUnselected([
           { value: 1, label: "The cabinet design is carried out with sketches and without article reference." },
           { value: 2, label: "between 1 and 3" },
           { value: 3, label: "The cabinet design is carried out graphically in 2D based on article information." },
           { value: 4, label: "between 3 and 5" },
           { value: 5, label: "The cabinet design is carried out graphically in 3D based on article information." },
-        ],
+        ]),
       },
       {
         id: "q8b",
         prompt: "In which detail and quality level does the customer create cabinet layout drawings?",
-        options: [
+        options: withUnselected([
           { value: 1, label: "The cabinet design contains only the dimensions (construction plan)." },
           { value: 2, label: "between 1 and 3" },
           { value: 3, label: "The cabinet design allows automatic derivation of the NC data/programming (cut-outs, drilling, tapping)." },
           { value: 4, label: "between 3 and 5" },
           { value: 5, label: "The cabinet design allows wiring routing (wire length calculation)." },
-        ],
+        ]),
       },
     ],
   },
@@ -653,13 +659,13 @@ export const productionSections: SectionDefinition<keyof ProductionAnswers>[] = 
       {
         id: "q11",
         prompt: "How do you structure your bill of materials?",
-        options: [
+        options: withUnselected([
           { value: 1, label: "No BOM available" },
           { value: 2, label: "BOM manual created" },
           { value: 3, label: "BOM created based on CAE system" },
           { value: 4, label: "BOM created based on CAE system with all panel components and accessories" },
           { value: 5, label: "BOM Per mounting location (e.g. individual BOMs for the body of the cabinet and one for the door)" },
-        ],
+        ]),
       },
     ],
   },
@@ -670,13 +676,13 @@ export const productionSections: SectionDefinition<keyof ProductionAnswers>[] = 
       {
         id: "q12",
         prompt: "How are holes and cutouts made to the doors and mounting panels?",
-        options: [
+        options: withUnselected([
           { value: 1, label: "Manual drilling and cutting according to each worker's own judgement" },
           { value: 2, label: "Manual drilling and cutting using dimensioned panel layouts" },
           { value: 3, label: "Manual drilling and cutting using templates from CAE software" },
           { value: 4, label: "Using NC machines; data entered manually" },
           { value: 5, label: "Using NC machines; data imported from CAE software" },
-        ],
+        ]),
       },
     ],
   },
@@ -687,13 +693,13 @@ export const productionSections: SectionDefinition<keyof ProductionAnswers>[] = 
       {
         id: "q13",
         prompt: "How do you create and apply the component labels?",
-        options: [
+        options: withUnselected([
           { value: 1, label: "Labels are typed in manually from the schematic and printed out" },
           { value: 2, label: "between 1 and 3" },
           { value: 3, label: "The Label information is exported from CAE and manually transferred to a label maker" },
           { value: 4, label: "between 3 and 5" },
           { value: 5, label: "The Label information is transferred automatically from the CAD/CAE to a label maker" },
-        ],
+        ]),
       },
     ],
   },
@@ -704,13 +710,13 @@ export const productionSections: SectionDefinition<keyof ProductionAnswers>[] = 
       {
         id: "q14",
         prompt: "How do you fabricate the wires for your control panels?",
-        options: [
+        options: withUnselected([
           { value: 1, label: "Manual fabrication during wiring" },
           { value: 2, label: "between 1 and 3" },
           { value: 3, label: "Using a NC cutting and crimping machine, semi automated" },
           { value: 4, label: "between 3 and 5" },
           { value: 5, label: "Using a NC cutting and crimping machine, fully automated or outsourced fabrication" },
-        ],
+        ]),
       },
     ],
   },
@@ -721,13 +727,13 @@ export const productionSections: SectionDefinition<keyof ProductionAnswers>[] = 
       {
         id: "q15",
         prompt: "Which method do you use to cut mounting rails, wire ducts and wire duct covers?",
-        options: [
+        options: withUnselected([
           { value: 1, label: "Manual measuring and cutting according to each worker's own judgement" },
           { value: 2, label: "Manual measuring and cutting using dimensioned panel layout" },
           { value: 3, label: "Manual cutting using cutting list from CAE Software" },
           { value: 4, label: "Measuring and cutting performed by NC machines, data entered manually" },
           { value: 5, label: "Measuring and cutting performed by NC machines with data from CAE software" },
-        ],
+        ]),
       },
     ],
   },
@@ -738,13 +744,13 @@ export const productionSections: SectionDefinition<keyof ProductionAnswers>[] = 
       {
         id: "q16",
         prompt: "What documents do you use in the manufacturing process?",
-        options: [
+        options: withUnselected([
           { value: 1, label: "Placement according to each worker's own judgement" },
           { value: 2, label: "between 1 and 3" },
           { value: 3, label: "Placement according to a basic panel layout" },
           { value: 4, label: "between 3 and 5" },
           { value: 5, label: "Placement according to a detailed panel layout" },
-        ],
+        ]),
       },
     ],
   },
@@ -755,13 +761,13 @@ export const productionSections: SectionDefinition<keyof ProductionAnswers>[] = 
       {
         id: "q17",
         prompt: "How do you assemble your terminal strips?",
-        options: [
+        options: withUnselected([
           { value: 1, label: "Terminals are manually identified, placed and labeled base on the schematic" },
           { value: 2, label: "Terminals are manually identified, placed and labeled base on a terminal diagram" },
           { value: 3, label: "Preassembled by the manufacturer (e.g. Phoenix Contact Clip Project) with data from CAE software" },
           { value: 4, label: "between 3 and 5" },
           { value: 5, label: "Terminal strips are assembled automatically using a NC machine" },
-        ],
+        ]),
       },
     ],
   },
@@ -772,13 +778,13 @@ export const productionSections: SectionDefinition<keyof ProductionAnswers>[] = 
       {
         id: "q18",
         prompt: "What documents do you use for the wiring process?",
-        options: [
+        options: withUnselected([
           { value: 1, label: "Schematic diagrams" },
           { value: 2, label: "between 1 and 3" },
           { value: 3, label: "Wiring / Connection lists (only source and target information)" },
           { value: 4, label: "between 3 and 5" },
           { value: 5, label: "Digital panel wiring tool (wire size, length, termination type, routing path, source and target)" },
-        ],
+        ]),
       },
     ],
   },
@@ -858,17 +864,109 @@ export function recommendationStatus(
   return "To be offered/implemented";
 }
 
+function formatCount(value: number) {
+  return Number.isInteger(value) ? String(value) : number(value, 1);
+}
+
 export function formatQuantity(quantity: RecommendationQuantity, input: Inputs) {
   switch (quantity.kind) {
     case "fixed":
-      return String(quantity.value);
+      return formatCount(quantity.value);
     case "tbd":
       return "TBD";
     case "engineeringFte":
-      return number(input.engineeringFte, 1);
+      return formatCount(input.engineeringFte);
     case "productionFte":
-      return number(input.productionFte, 1);
+      return formatCount(input.productionFte);
     default:
       return "";
   }
+}
+
+export type ReportRow = {
+  label: string;
+  engineeringValue: string;
+  productionLabel: string;
+  productionValue: string;
+  total?: string;
+};
+
+// Mirrors the Report sheet layout (A1:J18) as structured rows so the UI can
+// render the same data as a table (desktop) or stacked cards (mobile).
+export function buildReportRows(
+  report: ReturnType<typeof calculate>,
+  currency: string,
+): ReportRow[] {
+  return [
+    {
+      label: "Total pages per year",
+      engineeringValue: report.totalPages.toLocaleString(),
+      productionLabel: "Total panels per year",
+      productionValue: report.totalPanels.toLocaleString(),
+    },
+    {
+      label: "Engineering hours per year",
+      engineeringValue: number(report.engineeringHours, 0),
+      productionLabel: "Production hours per year",
+      productionValue: number(report.productionHours, 0),
+    },
+    {
+      label: "Engineering costs per year",
+      engineeringValue: money(report.engineeringCost, currency),
+      productionLabel: "Production costs per year",
+      productionValue: money(report.productionCost, currency),
+    },
+    {
+      label: "Time per page",
+      engineeringValue: `${number(report.timePerPage, 3)} h`,
+      productionLabel: "Time per panel",
+      productionValue: `${number(report.timePerPanel, 3)} h`,
+    },
+    {
+      label: "Saving potential ratio 10%",
+      engineeringValue: money(report.engineeringSavings10, currency),
+      productionLabel: "Saving potential ratio 10%",
+      productionValue: money(report.productionSavings10, currency),
+    },
+    {
+      label: "Saving potential ratio 20%",
+      engineeringValue: money(report.engineeringSavings20, currency),
+      productionLabel: "Saving potential ratio 20%",
+      productionValue: money(report.productionSavings20, currency),
+    },
+    {
+      label: "Saving potential ratio 30%",
+      engineeringValue: money(report.engineeringSavings30, currency),
+      productionLabel: "Saving potential ratio 30%",
+      productionValue: money(report.productionSavings30, currency),
+    },
+    {
+      label: "As Is Efficiency Level",
+      engineeringValue: `${number(report.engineeringCurrentLevel, 2)} / ${number(report.engineeringAsIsRatio * 100, 1)}%`,
+      productionLabel: "As Is Efficiency Level",
+      productionValue: `${number(report.productionCurrentLevel, 2)} / ${number(report.productionAsIsRatio * 100, 1)}%`,
+    },
+    {
+      label: "Target Efficiency Level",
+      engineeringValue: `${number(report.engineeringTargetLevel, 2)} / ${number(report.engineeringTargetRatio * 100, 1)}%`,
+      productionLabel: "Target Efficiency Level",
+      productionValue: `${number(report.productionTargetLevel, 2)} / ${number(report.productionTargetRatio * 100, 1)}%`,
+    },
+    {
+      label: "Difference",
+      engineeringValue: `${number(report.engineeringDifference * 100, 1)}%`,
+      productionLabel: "Difference",
+      productionValue: `${number(report.productionDifference * 100, 1)}%`,
+    },
+    {
+      label: "Saving potential engineering",
+      engineeringValue: money(report.engineeringSavingPotential, currency),
+      productionLabel: "Saving potential production",
+      productionValue: money(report.productionSavingPotential, currency),
+      total: moneyWithCents(
+        report.engineeringSavingPotential + report.productionSavingPotential,
+        currency,
+      ),
+    },
+  ];
 }

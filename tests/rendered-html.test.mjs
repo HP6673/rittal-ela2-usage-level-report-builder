@@ -41,6 +41,11 @@ test("server-renders the ELA2 report builder", async () => {
   assert.match(html, /Improvements to engineering/i);
   assert.match(html, /Improvements to production/i);
   assert.match(html, /rittal-logo\.png/);
+
+  // Requirement #1/#11: workbook defaults must be applied on load, not a
+  // static, misleading $0.00 total.
+  assert.match(html, /\$137,813\.21/);
+  assert.doesNotMatch(html, /\$0\.00/);
 });
 
 test("keeps deployment metadata and source aligned", async () => {
