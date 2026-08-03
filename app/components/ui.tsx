@@ -44,10 +44,10 @@ export function Field({
         <input
           aria-describedby={describedBy || undefined}
           aria-invalid={error ? true : undefined}
-          className={`h-11 w-full max-w-full rounded border bg-white px-3 text-base shadow-inner outline-none transition focus-visible:ring-2 focus-visible:ring-[#c8102e]/40 print:border-none print:shadow-none ${
+          className={`h-11 w-full max-w-full rounded border bg-white px-3 text-base shadow-inner outline-none transition focus-visible:ring-2 focus-visible:ring-[#e50043]/40 print:border-none print:shadow-none ${
             error
               ? "border-[#dc2626] focus:border-[#dc2626]"
-              : "border-[#cbd5e1] focus:border-[#c8102e]"
+              : "border-[#cbd5e1] focus:border-[#e50043]"
           } ${suffix ? "pr-9" : ""}`}
           id={id}
           inputMode={inputMode}
@@ -116,7 +116,7 @@ export function SectionCard({
             {step ? (
               <span
                 aria-hidden="true"
-                className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#c8102e] text-xs font-bold text-white print:hidden"
+                className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#e50043] text-xs font-bold text-white print:hidden"
               >
                 {step}
               </span>

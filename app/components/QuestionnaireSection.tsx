@@ -35,16 +35,16 @@ function AnswerOptionList<K extends string>({
 
           return (
             <label
-              className={`flex min-w-0 cursor-pointer items-start gap-2 rounded border px-2 py-1.5 text-sm transition focus-within:ring-2 focus-within:ring-[#c8102e]/40 ${
+              className={`flex min-w-0 cursor-pointer items-start gap-2 rounded border px-2 py-1.5 text-sm transition focus-within:ring-2 focus-within:ring-[#e50043]/40 ${
                 selected
-                  ? "border-[#c8102e] bg-[#fdeef0]"
+                  ? "border-[#e50043] bg-[#fdeef0]"
                   : "border-[#e2e8f0] bg-white hover:bg-[#f8fafc]"
               }`}
               key={option.value}
             >
               <input
                 checked={selected}
-                className="mt-0.5 h-4 w-4 shrink-0 accent-[#c8102e]"
+                className="mt-0.5 h-4 w-4 shrink-0 accent-[#e50043]"
                 name={name}
                 onChange={() => onChange(option.value)}
                 type="radio"
@@ -54,7 +54,7 @@ function AnswerOptionList<K extends string>({
                 aria-hidden="true"
                 className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
                   selected
-                    ? "bg-[#c8102e] text-white"
+                    ? "bg-[#e50043] text-white"
                     : "bg-[#e2e8f0] text-[#52606d]"
                 }`}
               >

@@ -116,14 +116,14 @@ export function ExportReportModal({
         </div>
         <div className="flex w-full shrink-0 gap-2 sm:w-auto">
           <button
-            className="h-10 flex-1 rounded-md border border-[#d6dce3] bg-white px-3 text-xs font-semibold text-[#4d5662] transition hover:bg-[#f8fafc] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c8102e] sm:flex-none sm:text-sm"
+            className="h-10 flex-1 rounded-md border border-[#d6dce3] bg-white px-3 text-xs font-semibold text-[#4d5662] transition hover:bg-[#f8fafc] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e50043] sm:flex-none sm:text-sm"
             onClick={onClose}
             type="button"
           >
             Back to editor
           </button>
           <button
-            className="h-10 flex-1 rounded-md bg-[#c8102e] px-3 text-xs font-semibold text-white shadow-[0_10px_24px_rgba(200,16,46,0.25)] transition hover:bg-[#a80d26] sm:flex-none sm:text-sm"
+            className="h-10 flex-1 rounded-md bg-[#e50043] px-3 text-xs font-semibold text-white shadow-[0_10px_24px_rgba(229,0,67,0.25)] transition hover:bg-[#c00038] sm:flex-none sm:text-sm"
             onClick={() => window.print()}
             type="button"
           >
@@ -138,7 +138,7 @@ export function ExportReportModal({
           id="export-report"
         >
           {/* Cover / header — requirement #2 */}
-          <header className="flex flex-wrap items-start justify-between gap-6 border-b-2 border-[#c8102e] pb-6">
+          <header className="flex flex-wrap items-start justify-between gap-6 border-b-2 border-[#e50043] pb-6">
             <div className="flex items-center gap-4">
               <img
                 alt="Rittal"
@@ -249,8 +249,8 @@ export function ExportReportModal({
               <MetricsTable rows={engineeringMetrics} title="Engineering results" />
               <MetricsTable rows={productionMetrics} title="Production results" />
             </div>
-            <div className="mt-4 rounded-md border border-[#c8102e]/30 bg-[#fdeef0] p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#a80d26]">
+            <div className="mt-4 rounded-md border border-[#e50043]/30 bg-[#fdeef0] p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#c00038]">
                 Total result
               </p>
               <div className="mt-2 flex flex-wrap items-baseline gap-x-6 gap-y-1">
@@ -331,12 +331,12 @@ function CoverStat({
   return (
     <div
       className={`rounded-md border p-3 ${
-        emphasize ? "border-[#c8102e]/30 bg-[#fdeef0]" : "border-[#e2e8f0] bg-[#fbfcfe]"
+        emphasize ? "border-[#e50043]/30 bg-[#fdeef0]" : "border-[#e2e8f0] bg-[#fbfcfe]"
       }`}
     >
       <p
         className={`text-[10px] font-semibold uppercase tracking-[0.1em] ${
-          emphasize ? "text-[#a80d26]" : "text-[#94a3b8]"
+          emphasize ? "text-[#c00038]" : "text-[#94a3b8]"
         }`}
       >
         {label}
@@ -398,7 +398,7 @@ function PrintChartSummary({ title, chart }: { title: string; chart: ChartData }
       <h3 className="text-sm font-semibold text-[#111827]">{title}</h3>
       <div className="mt-1.5 flex items-center gap-4 text-xs text-[#64748b]">
         <span className="inline-flex items-center gap-1.5">
-          <span aria-hidden="true" className="h-2.5 w-2.5 rounded-sm bg-[#C8102E]" />
+          <span aria-hidden="true" className="h-2.5 w-2.5 rounded-sm bg-[#E50043]" />
           {chart.primaryLabel}
         </span>
         <span className="inline-flex items-center gap-1.5">
@@ -418,7 +418,7 @@ function PrintChartSummary({ title, chart }: { title: string; chart: ChartData }
                 <div
                   style={{
                     width: bar.total ? `${(bar.primary / bar.total) * 100}%` : "0%",
-                    backgroundColor: "#C8102E",
+                    backgroundColor: "#E50043",
                   }}
                 />
                 <div

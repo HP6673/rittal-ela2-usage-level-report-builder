@@ -87,9 +87,9 @@ export function RecommendationsSection({
           return (
             <button
               aria-pressed={active}
-              className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c8102e] ${
+              className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e50043] ${
                 active
-                  ? "border-[#c8102e] bg-[#c8102e] text-white"
+                  ? "border-[#e50043] bg-[#e50043] text-white"
                   : "border-[#d6dce3] bg-white text-[#4d5662] hover:bg-[#f8fafc]"
               }`}
               key={value}

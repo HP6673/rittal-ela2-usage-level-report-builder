@@ -138,8 +138,8 @@ export function ReportSummarySection({
         <div className="grid gap-3 md:hidden">
           <MetricsCard rows={engineeringMetrics} title="Engineering metrics" />
           <MetricsCard rows={productionMetrics} title="Production metrics" />
-          <div className="rounded-md border border-[#c8102e]/30 bg-[#fdeef0] p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#a80d26]">
+          <div className="rounded-md border border-[#e50043]/30 bg-[#fdeef0] p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#c00038]">
               Total savings
             </p>
             <p className="mt-1 text-2xl font-semibold text-[#111827]">

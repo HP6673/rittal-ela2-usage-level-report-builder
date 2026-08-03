@@ -283,14 +283,14 @@ export function Calculator() {
               </div>
               <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
                 <button
-                  className="h-10 rounded-md border border-[#d6dce3] bg-white px-3 text-xs font-semibold text-[#4d5662] transition hover:bg-[#f8fafc] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c8102e]"
+                  className="h-10 rounded-md border border-[#d6dce3] bg-white px-3 text-xs font-semibold text-[#4d5662] transition hover:bg-[#f8fafc] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e50043]"
                   onClick={clearAssessment}
                   type="button"
                 >
                   Clear assessment
                 </button>
                 <button
-                  className="h-10 rounded-md bg-[#c8102e] px-3 text-xs font-semibold text-white shadow-[0_10px_24px_rgba(200,16,46,0.25)] transition hover:bg-[#a80d26] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a80d26]"
+                  className="h-10 rounded-md bg-[#e50043] px-3 text-xs font-semibold text-white shadow-[0_10px_24px_rgba(229,0,67,0.25)] transition hover:bg-[#c00038] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c00038]"
                   onClick={() => setShowExportPreview(true)}
                   type="button"
                 >
@@ -316,7 +316,7 @@ export function Calculator() {
             return (
               <a
                 aria-current={active ? "step" : undefined}
-                className="shrink-0 whitespace-nowrap rounded-md bg-transparent px-3 py-1.5 text-xs font-semibold text-[#4d5662] transition hover:text-[#c8102e] hover:shadow-[0_2px_10px_rgba(200,16,46,0.35)] focus-visible:text-[#c8102e] focus-visible:shadow-[0_2px_10px_rgba(200,16,46,0.35)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c8102e]"
+                className="shrink-0 whitespace-nowrap rounded-md bg-transparent px-3 py-1.5 text-xs font-semibold text-[#4d5662] transition hover:text-[#e50043] hover:shadow-[0_2px_10px_rgba(229,0,67,0.35)] focus-visible:text-[#e50043] focus-visible:shadow-[0_2px_10px_rgba(229,0,67,0.35)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e50043]"
                 href={`#${step.id}`}
                 key={step.id}
               >
@@ -389,7 +389,7 @@ export function Calculator() {
           title="Export report"
         >
           <button
-            className="h-11 rounded-md bg-[#c8102e] px-5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(200,16,46,0.25)] transition hover:bg-[#a80d26]"
+            className="h-11 rounded-md bg-[#e50043] px-5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(229,0,67,0.25)] transition hover:bg-[#c00038]"
             onClick={() => setShowExportPreview(true)}
             type="button"
           >

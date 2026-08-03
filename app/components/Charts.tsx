@@ -5,7 +5,7 @@ import { levelKey, number, yAxisTicks, type ChartData } from "../lib/calculation
 
 // Rittal-style chart accents (red/gray) instead of generic blue/orange.
 const chartColors = {
-  primary: "#C8102E",
+  primary: "#E50043",
   secondary: "#94A3B8",
 };
 
@@ -138,7 +138,7 @@ export function WorkbookChart({
                     >
                       <div
                         aria-label={`${heading}: ${data.primaryLabel} ${number(data.primary[index] * 100, 1)}%, ${data.secondaryLabel} ${number(data.secondary[index] * 100, 1)}%, total ${number(total * 100, 1)}%`}
-                        className="mx-auto flex w-full max-w-9 flex-col justify-end overflow-hidden rounded-t-sm bg-[#e5e7eb] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c8102e]"
+                        className="mx-auto flex w-full max-w-9 flex-col justify-end overflow-hidden rounded-t-sm bg-[#e5e7eb] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e50043]"
                         onBlur={() => {
                           setTooltip(null);
                           setAxisTooltip(null);
