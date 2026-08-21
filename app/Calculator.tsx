@@ -10,7 +10,7 @@ import {
 import {
   calculate,
   clampField,
-  defaults,
+  clearedDefaults,
   engineeringChartData,
   fieldConstraints,
   moneyWithCents,
@@ -64,7 +64,7 @@ function describeConstraint(key: NumericInputKey) {
 }
 
 export function Calculator() {
-  const [input, setInput] = useState<Inputs>(defaults);
+  const [input, setInput] = useState<Inputs>(clearedDefaults);
   const [fieldNotice, setFieldNotice] = useState<{ key: keyof Inputs; message: string } | null>(
     null,
   );
@@ -75,8 +75,9 @@ export function Calculator() {
   // Requirement #16 — restore a returning visitor's entries. Deliberately a
   // post-hydration effect (not a lazy useState initializer): the server has
   // no localStorage, so reading it during render would mismatch the SSR
-  // markup. First load always renders the workbook defaults, matching the
-  // "$137,813.21 on first load" acceptance check.
+  // markup. A first-time visitor (nothing saved yet) starts on the cleared
+  // assessment — workbook defaults for company/business inputs, but no
+  // pre-answered questionnaire — rather than the demo-filled workbook state.
   useEffect(() => {
     try {
       const saved = window.localStorage.getItem(STORAGE_KEY);

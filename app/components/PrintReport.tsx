@@ -380,32 +380,23 @@ function MetricsTable({ title, rows }: { title: string; rows: MetricRow[] }) {
 // fits the printable page — the full interactive chart's horizontal scroll
 // container would otherwise get clipped mid-page when printed.
 function PrintChartSummary({ title, chart }: { title: string; chart: ChartData }) {
-  const asIsIndex = chart.labels.indexOf("As-is");
-  const targetIndex = chart.labels.indexOf("Target");
   const bars = [
-    { label: "As-is", index: asIsIndex },
-    { label: "Target", index: targetIndex },
-  ].map(({ label, index }) => ({
-    label,
-    primary: chart.primary[index],
-    secondary: chart.secondary[index],
-    total: chart.total[index],
-  }));
+    {
+      label: "As-is",
+      total: chart.categories.reduce((sum, category) => sum + category.asIs, 0),
+      key: "asIs" as const,
+    },
+    {
+      label: "Target",
+      total: chart.categories.reduce((sum, category) => sum + category.target, 0),
+      key: "target" as const,
+    },
+  ];
   const max = Math.max(...bars.map((bar) => bar.total), 0.01);
 
   return (
     <div className="min-w-0 print:break-inside-avoid">
       <h3 className="text-sm font-semibold text-[#111827]">{title}</h3>
-      <div className="mt-1.5 flex items-center gap-4 text-xs text-[#64748b]">
-        <span className="inline-flex items-center gap-1.5">
-          <span aria-hidden="true" className="h-2.5 w-2.5 rounded-sm bg-[#E50043]" />
-          {chart.primaryLabel}
-        </span>
-        <span className="inline-flex items-center gap-1.5">
-          <span aria-hidden="true" className="h-2.5 w-2.5 rounded-sm bg-[#94A3B8]" />
-          {chart.secondaryLabel}
-        </span>
-      </div>
       <div className="mt-3 grid gap-3">
         {bars.map((bar) => (
           <div className="grid grid-cols-[52px_1fr_48px] items-center gap-2" key={bar.label}>
@@ -415,24 +406,41 @@ function PrintChartSummary({ title, chart }: { title: string; chart: ChartData }
                 className="flex h-full"
                 style={{ width: `${(bar.total / max) * 100}%` }}
               >
-                <div
-                  style={{
-                    width: bar.total ? `${(bar.primary / bar.total) * 100}%` : "0%",
-                    backgroundColor: "#E50043",
-                  }}
-                />
-                <div
-                  style={{
-                    width: bar.total ? `${(bar.secondary / bar.total) * 100}%` : "0%",
-                    backgroundColor: "#94A3B8",
-                  }}
-                />
+                {chart.categories.map((category) => {
+                  const value = category[bar.key];
+
+                  if (value <= 0) {
+                    return null;
+                  }
+
+                  return (
+                    <div
+                      key={category.label}
+                      style={{
+                        width: bar.total ? `${(value / bar.total) * 100}%` : "0%",
+                        backgroundColor: category.color,
+                      }}
+                    />
+                  );
+                })}
               </div>
             </div>
             <span className="text-right text-xs font-semibold text-[#111827]">
               {number(bar.total * 100, 1)}%
             </span>
           </div>
+        ))}
+      </div>
+      <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-[10px] text-[#64748b]">
+        {chart.categories.map((category) => (
+          <span className="inline-flex items-center gap-1" key={category.label}>
+            <span
+              aria-hidden="true"
+              className="h-2 w-2 shrink-0 rounded-sm"
+              style={{ backgroundColor: category.color }}
+            />
+            {category.label}
+          </span>
         ))}
       </div>
     </div>

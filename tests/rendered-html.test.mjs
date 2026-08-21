@@ -23,7 +23,7 @@ async function render() {
   );
 }
 
-test("server-renders the ELA2 report builder with workbook defaults applied", async () => {
+test("server-renders the ELA2 report builder starting on a cleared assessment", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
@@ -56,9 +56,10 @@ test("server-renders the ELA2 report builder with workbook defaults applied", as
   assert.match(html, /PDM\/PLM/);
   assert.match(html, />ERP</);
 
-  // Requirement #1/#8 — workbook defaults must be applied on load, not a
-  // static, misleading $0.00 total.
-  assert.match(html, /\$137,813\.21/);
+  // A first-time visitor starts on the cleared assessment — workbook
+  // defaults for company/business inputs, but an unanswered questionnaire —
+  // not a static, misleading $0.00 total.
+  assert.match(html, /\$188,709\.98/);
   assert.doesNotMatch(html, /\$0\.00/);
 
   // Requirement #6 — the two *editable* target-level fields must have

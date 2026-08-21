@@ -4,6 +4,8 @@
 
 import {
   avg,
+  blankEngineeringAnswers,
+  blankProductionAnswers,
   computeEngineeringCurrentLevel,
   computeProductionCurrentLevel,
   defaultEngineeringAnswers,
@@ -88,6 +90,15 @@ export const defaults: Inputs = {
   productionTargetLevel: 3.5,
 };
 
+// A first-time visitor starts here, not on `defaults` — same workbook
+// company/business figures, but with an unanswered questionnaire, matching
+// what the "Clear assessment" action produces.
+export const clearedDefaults: Inputs = {
+  ...defaults,
+  engineeringAnswers: blankEngineeringAnswers,
+  productionAnswers: blankProductionAnswers,
+};
+
 export const baseLevelLabels = [
   "1",
   "1.5",
@@ -137,6 +148,13 @@ function hlookupApprox(level: number, denseValues: number[]) {
   return denseValues[Math.max(0, Math.min(denseValues.length - 1, index))];
 }
 
+export type CategoryDatum = {
+  label: string;
+  color: string;
+  asIs: number;
+  target: number;
+};
+
 export type ChartData = {
   labels: string[];
   currentLevel: number;
@@ -147,7 +165,33 @@ export type ChartData = {
   secondary: number[];
   total: number[];
   denseTotal: number[];
+  categories: CategoryDatum[];
 };
+
+// CALC1's "Engineering time (total)" table — one row per named work item,
+// in the order EPLAN asked us to chart it (requirement: replace the level
+// 1-5 bar chart with this As-is/Target category breakdown).
+const engineeringCategoryLabels = [
+  "1. Specification",
+  "2. Framework conditions",
+  "3. Engineering",
+  "4. Design (drawing)",
+  "5. Quality check",
+  "6. Bill of material",
+  "7. Reports",
+  "8. Cabinet design",
+];
+
+const engineeringCategoryColors = [
+  "#A9C4E8",
+  "#94A3B8",
+  "#C9B37C",
+  "#E50043",
+  "#64748B",
+  "#E0A526",
+  "#2F6F4E",
+  "#111827",
+];
 
 export function engineeringChartData(input: Inputs): ChartData {
   const currentLevel = computeEngineeringCurrentLevel(input.engineeringAnswers);
@@ -202,6 +246,16 @@ export function engineeringChartData(input: Inputs): ChartData {
     hlookupApprox(targetLevel, denseEngineering),
   ];
   const total = engineering.map((value, index) => value + standardization[index]);
+  const categories = rows.map((row, index) => {
+    const denseRow = buildCalc2Lookup(row);
+
+    return {
+      label: engineeringCategoryLabels[index],
+      color: engineeringCategoryColors[index],
+      asIs: hlookupApprox(currentLevel, denseRow),
+      target: hlookupApprox(targetLevel, denseRow),
+    };
+  });
 
   return {
     labels: [...baseLevelLabels, "As-is", "Target"],
@@ -213,12 +267,45 @@ export function engineeringChartData(input: Inputs): ChartData {
     secondary: standardization,
     total,
     denseTotal,
+    categories,
   };
 }
 
 function engineeringEfficiencyValues(input: Inputs) {
   return engineeringChartData(input).denseTotal;
 }
+
+// CALC1's "Production time (total)" table — same idea as the engineering
+// categories above, 12 named work items instead of 8.
+const productionCategoryLabels = [
+  "11. Fitting",
+  "12. Panel modification",
+  "13. Labeling Devices",
+  "14. Wire Fabrication",
+  "15. Mechanical installation",
+  "16. Devices installation",
+  "17. Terminal strip assembly",
+  "18. Wiring",
+  "19. Testing",
+  "20. Packaging",
+  "21. Article (3D mockup)",
+  "22. Cabinet design",
+];
+
+const productionCategoryColors = [
+  "#A9C4E8",
+  "#94A3B8",
+  "#E0A526",
+  "#E50043",
+  "#64748B",
+  "#B8C4CE",
+  "#2F5AA8",
+  "#111827",
+  "#8A94A0",
+  "#3F8F5F",
+  "#4C7EB8",
+  "#C9B37C",
+];
 
 export function productionChartData(input: Inputs): ChartData {
   const currentLevel = computeProductionCurrentLevel(input.productionAnswers);
@@ -281,6 +368,17 @@ export function productionChartData(input: Inputs): ChartData {
     hlookupApprox(currentLevel, denseStandardization),
     hlookupApprox(targetLevel, denseStandardization),
   ];
+  const productionRows = [...staticRows, article3d, cabinetDesign];
+  const categories = productionRows.map((row, index) => {
+    const denseRow = buildCalc2Lookup(row);
+
+    return {
+      label: productionCategoryLabels[index],
+      color: productionCategoryColors[index],
+      asIs: hlookupApprox(currentLevel, denseRow),
+      target: hlookupApprox(targetLevel, denseRow),
+    };
+  });
 
   return {
     labels: [...baseLevelLabels, "As-is", "Target"],
@@ -294,6 +392,7 @@ export function productionChartData(input: Inputs): ChartData {
       (value, index) => value + standardizationWithMarkers[index],
     ),
     denseTotal,
+    categories,
   };
 }
 
