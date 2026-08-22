@@ -257,9 +257,9 @@ export function Calculator() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="flex min-w-0 items-center gap-3 sm:gap-4">
               <img
-                alt="Rittal"
-                className="h-14 w-24 shrink-0 object-contain sm:h-20 sm:w-32 lg:w-40"
-                src="/rittal-logo.png"
+                alt="EPLAN"
+                className="h-14 w-10 shrink-0 object-contain sm:h-20 sm:w-14"
+                src="/eplan-logo.svg"
               />
               <div className="min-w-0">
                 <h1 className="text-2xl font-semibold tracking-normal text-[#111827] sm:text-3xl lg:text-4xl">

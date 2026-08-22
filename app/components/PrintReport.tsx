@@ -141,13 +141,13 @@ export function ExportReportModal({
           <header className="flex flex-wrap items-start justify-between gap-6 border-b-2 border-[#e50043] pb-6">
             <div className="flex items-center gap-4">
               <img
-                alt="Rittal"
-                className="h-14 w-24 shrink-0 object-contain sm:h-16 sm:w-28"
-                src="/rittal-logo.png"
+                alt="EPLAN"
+                className="h-14 w-10 shrink-0 object-contain sm:h-16 sm:w-11"
+                src="/eplan-logo.svg"
               />
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#94a3b8]">
-                  Rittal
+                  EPLAN
                 </p>
                 <h1 className="text-2xl font-bold text-[#111827] sm:text-3xl">
                   ELA2 Usage Level Report

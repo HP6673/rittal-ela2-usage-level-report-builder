@@ -41,7 +41,7 @@ test("server-renders the ELA2 report builder starting on a cleared assessment", 
   assert.match(html, />Export report</i);
   assert.match(html, /Improvements to engineering/i);
   assert.match(html, /Improvements to production/i);
-  assert.match(html, /rittal-logo\.png/);
+  assert.match(html, /eplan-logo\.svg/);
 
   // Requirement #1 — the new "General information" fields must be present.
   assert.match(html, /Company name/i);
@@ -109,7 +109,7 @@ test("export report: dedicated preview covers every required section and hides r
   assert.match(printReport, /onClick=\{\(\) => window\.print\(\)\}/);
 
   // Requirement #2 — cover/header content.
-  assert.match(printReport, /rittal-logo\.png/);
+  assert.match(printReport, /eplan-logo\.svg/);
   assert.match(printReport, /ELA2 Usage Level Report/);
   assert.match(printReport, /input\.companyName/);
   assert.match(printReport, /input\.segmentIndustry/);
@@ -188,7 +188,7 @@ test("keeps deployment metadata and source aligned", async () => {
   assert.match(page, /export const metadata:\s*Metadata/);
   assert.match(page, /<Calculator \/>/);
   assert.match(layout, /title:\s*"ELA2 Usage Level Report Builder"/);
-  assert.match(calculator, /src="\/rittal-logo\.png"/);
+  assert.match(calculator, /src="\/eplan-logo\.svg"/);
   assert.match(packageJson, /"packageManager": "pnpm@11\.9\.0"/);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
   assert.match(wrangler, /"compatibility_flags": \["nodejs_compat"\]/);
