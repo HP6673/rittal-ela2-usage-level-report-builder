@@ -153,16 +153,6 @@ function withUnselected(options: QuestionOption[]): QuestionOption[] {
   return [unselectedOption, ...options];
 }
 
-// Menus!D2:G7 — identical option set shared by the 4 "Delivery specifications"
-// sub-questions.
-const genericRequirementOptions: QuestionOption[] = withUnselected([
-  { value: 1, label: "Changes in requirements are processed manual." },
-  { value: 2, label: "between 1 and 3" },
-  { value: 3, label: "Templates and structures take into account the some variance in requirements." },
-  { value: 4, label: "between 3 and 5" },
-  { value: 5, label: "Automation allows to switch between different requirements." },
-]);
-
 export const engineeringSections: SectionDefinition<keyof EngineeringAnswers>[] = [
   {
     number: "1.",
@@ -170,35 +160,35 @@ export const engineeringSections: SectionDefinition<keyof EngineeringAnswers>[] 
     questions: [
       {
         id: "q1a",
-        prompt: "How does the customer and order data reach the design department?",
+        prompt: "A new order has just been won. What does engineering normally receive before they can start designing?",
         options: withUnselected([
-          { value: 1, label: "Order data and requirements are transferred unstructured and mainly in paper. Supported by various meetings." },
+          { value: 1, label: "Emails, meeting notes, marked-up drawings, PDFs and verbal information from different people." },
           { value: 2, label: "between 1 and 3" },
-          { value: 3, label: "Order data and requirements are transferred based on existing templates (checklists, templates, option and variant lists, tables, etc.)." },
+          { value: 3, label: "A standard checklist or template with the major requirements and options." },
           { value: 4, label: "between 3 and 5" },
-          { value: 5, label: "Order data and requirements are gathered by a system (e.g. sales configurator) and automatically transferred to the design department." },
+          { value: 5, label: "Structured order / configuration information flows directly into engineering." },
         ]),
       },
       {
         id: "q1b",
-        prompt: "How is the order data and requirements handled in the design department?",
+        prompt: "Once engineering receives the project requirements, how easy is it to reuse that information during the design?",
         options: withUnselected([
-          { value: 1, label: "The storage of order data and requirements is mainly digital but not reusable (e.g. scanned documents, sketches, PDF)." },
+          { value: 1, label: "Engineers mostly read PDFs / notes and re-enter what they need." },
           { value: 2, label: "between 1 and 3" },
-          { value: 3, label: "The storage of order data and requirements is mainly digital and reusable (e.g. Excel spreadsheet and templates)." },
+          { value: 3, label: "Key information is stored in reusable spreadsheets / templates." },
           { value: 4, label: "between 3 and 5" },
-          { value: 5, label: "The storage of order data and requirements is fully digital and adapted for further usage (e.g. structured documentation in PDM system)." },
+          { value: 5, label: "Requirements are structured and can drive downstream engineering automatically." },
         ]),
       },
       {
         id: "q1c",
-        prompt: "Does the order data transferred to the design department contain a sensor-actuator list?",
+        prompt: "Before design begins, how complete is the device / I-O information engineering receives?",
         options: withUnselected([
-          { value: 1, label: "The design department does not receive a sensor-actuator list." },
+          { value: 1, label: "Engineering has to identify most sensors, actuators and I-O during design." },
           { value: 2, label: "between 1 and 3" },
-          { value: 3, label: "The design department receives preliminary sensor-actuator list." },
+          { value: 3, label: "A preliminary device / I-O list is available." },
           { value: 4, label: "between 3 and 5" },
-          { value: 5, label: "The design department receives detailed sensor-actuator lists, which can be further processed automatically." },
+          { value: 5, label: "A detailed, structured list is ready to be used by engineering systems." },
         ]),
       },
     ],
@@ -207,10 +197,50 @@ export const engineeringSections: SectionDefinition<keyof EngineeringAnswers>[] 
     number: "2.",
     title: "Delivery specifications",
     questions: [
-      { id: "q2a", prompt: "Applicable norms and standards", options: genericRequirementOptions },
-      { id: "q2b", prompt: "Used languages and translation", options: genericRequirementOptions },
-      { id: "q2c", prompt: "Parts selection and standardisation", options: genericRequirementOptions },
-      { id: "q2d", prompt: "Documentation (source/target specification, etc.)", options: genericRequirementOptions },
+      {
+        id: "q2a",
+        prompt: "A customer requires a different electrical standard or regional requirement. What normally happens?",
+        options: withUnselected([
+          { value: 1, label: "Engineers manually review and change the design." },
+          { value: 2, label: "between 1 and 3" },
+          { value: 3, label: "Standard templates cover some common requirements." },
+          { value: 4, label: "between 3 and 5" },
+          { value: 5, label: "Approved rules / automation switch the design to the required standard." },
+        ]),
+      },
+      {
+        id: "q2b",
+        prompt: "The same machine or panel is sold into another country and the documentation must change language. How is that handled?",
+        options: withUnselected([
+          { value: 1, label: "Text is translated and edited manually." },
+          { value: 2, label: "between 1 and 3" },
+          { value: 3, label: "Templates / translation tables handle common content." },
+          { value: 4, label: "between 3 and 5" },
+          { value: 5, label: "Language-specific documentation is generated from structured data." },
+        ]),
+      },
+      {
+        id: "q2c",
+        prompt: "An engineer needs a breaker, contactor, PLC card, VFD or other device. How do they select it and get it into the design?",
+        options: withUnselected([
+          { value: 1, label: "Search catalogs / websites and manually build the device data." },
+          { value: 2, label: "between 1 and 3" },
+          { value: 3, label: "Select from an internal standardized parts library." },
+          { value: 4, label: "between 3 and 5" },
+          { value: 5, label: "Approved product rules and structured device data drive selection." },
+        ]),
+      },
+      {
+        id: "q2d",
+        prompt: "A customer requires different deliverables, tags, source/target details or report formats. How is that handled?",
+        options: withUnselected([
+          { value: 1, label: "Someone manually modifies the project / reports." },
+          { value: 2, label: "between 1 and 3" },
+          { value: 3, label: "Standard templates cover common customer variations." },
+          { value: 4, label: "between 3 and 5" },
+          { value: 5, label: "Structured rules automatically generate the required deliverables." },
+        ]),
+      },
     ],
   },
   {
@@ -219,13 +249,13 @@ export const engineeringSections: SectionDefinition<keyof EngineeringAnswers>[] 
     questions: [
       {
         id: "q3a",
-        prompt: "How are new technical solutions (ETO) developed?",
+        prompt: "Think about the last project that required a genuinely new technical solution. How did the engineer build it?",
         options: withUnselected([
-          { value: 1, label: "New technical solutions are designed in a manual process (e.g. based on sketches)." },
+          { value: 1, label: "Start from sketches / previous jobs and engineer it manually." },
           { value: 2, label: "between 1 and 3" },
-          { value: 3, label: "New technical solutions are designed in a digital process." },
+          { value: 3, label: "Design it digitally using company standards and reusable content." },
           { value: 4, label: "between 3 and 5" },
-          { value: 5, label: "New technical solutions are designed in a digital process and new design is evaluated in order to extend existing standard." },
+          { value: 5, label: "Design it digitally, then convert the new solution into a reusable company standard." },
         ]),
       },
     ],
@@ -236,13 +266,13 @@ export const engineeringSections: SectionDefinition<keyof EngineeringAnswers>[] 
     questions: [
       {
         id: "q4a",
-        prompt: "How are circuit diagrams created?",
+        prompt: "A new project comes in that is similar to something your team has built before. How does the electrical designer typically get started?",
         options: withUnselected([
-          { value: 1, label: "The circuit diagrams are created manually by placing graphical symbols or partial circuits (e.g. copy and paste)." },
-          { value: 2, label: "between 1 and 3" },
-          { value: 3, label: "The circuit diagrams are created based on a central macro library with product functions and stored data tables." },
-          { value: 4, label: "between 3 and 5" },
-          { value: 5, label: "The circuit diagrams are mainly generated automatically based on a connection with a configurator." },
+          { value: 1, label: "Blank project or copy/paste pages and circuits from old jobs." },
+          { value: 2, label: "Find the closest old project and manually modify most of it." },
+          { value: 3, label: "Build from approved macros, circuits, templates and device data." },
+          { value: 4, label: "Configure most of the design from predefined options / rules." },
+          { value: 5, label: "A configurator or automated process generates most of the design." },
         ]),
       },
     ],
@@ -253,13 +283,13 @@ export const engineeringSections: SectionDefinition<keyof EngineeringAnswers>[] 
     questions: [
       {
         id: "q5a",
-        prompt: "How are circuit diagrams verified after creation?",
+        prompt: "Your engineer says the electrical design is finished. What happens before it is released to production?",
         options: withUnselected([
-          { value: 1, label: "The verification of the schematics is done manually by reviewing all schematics pages." },
-          { value: 2, label: "between 1 and 3" },
-          { value: 3, label: "The check of the circuit diagrams is done by automated mass controls and corrections (checking page cross-references)." },
-          { value: 4, label: "between 3 and 5" },
-          { value: 5, label: "The functional checks of the circuit diagrams are almost completely eliminated (e.g. generation)." },
+          { value: 1, label: "Someone manually reviews the drawings page-by-page." },
+          { value: 2, label: "Manual review using experience / checklists." },
+          { value: 3, label: "Software catches some issues, but a detailed manual review is still required." },
+          { value: 4, label: "Most common electrical / documentation errors are identified automatically." },
+          { value: 5, label: "The engineering process prevents or automatically identifies most common errors before release." },
         ]),
       },
     ],
@@ -270,24 +300,24 @@ export const engineeringSections: SectionDefinition<keyof EngineeringAnswers>[] 
     questions: [
       {
         id: "q6a",
-        prompt: "Up to which level does the circuit diagram contain article information?",
+        prompt: "Engineering releases a project and purchasing needs the BOM. How complete is the information coming directly from the electrical design?",
         options: withUnselected([
-          { value: 1, label: "The circuit diagram doesn't contain article information, the BOM is created manual in a separate list." },
+          { value: 1, label: "Purchasing / engineering builds the BOM separately." },
           { value: 2, label: "between 1 and 3" },
-          { value: 3, label: "The circuit diagram contains some article information (main parts) and is extended manually in parallel parts lists." },
+          { value: 3, label: "The design contains the main parts, but someone still adds / corrects information." },
           { value: 4, label: "between 3 and 5" },
-          { value: 5, label: "The circuit diagram contains full article information and a detailed and structured BOM can be exported." },
+          { value: 5, label: "The design contains complete structured device data and can produce a detailed BOM." },
         ]),
       },
       {
         id: "q6b",
-        prompt: "How is the bill of materials created and processed?",
+        prompt: "Once the BOM is generated, what normally happens before purchasing / ERP can use it?",
         options: withUnselected([
-          { value: 1, label: "The BOM is created and processed manually." },
+          { value: 1, label: "Someone creates and processes it manually." },
           { value: 2, label: "between 1 and 3" },
-          { value: 3, label: "The BOM is created automatically from CAE and manually processed and transferred to the ERP system." },
+          { value: 3, label: "Most of it is generated, but someone cleans it up and transfers it manually." },
           { value: 4, label: "between 3 and 5" },
-          { value: 5, label: "The BOM is created automatically from CAE and automaticlly processed and transferred to the ERP system." },
+          { value: 5, label: "It is generated and transferred automatically with little or no re-entry." },
         ]),
       },
     ],
@@ -298,24 +328,24 @@ export const engineeringSections: SectionDefinition<keyof EngineeringAnswers>[] 
     questions: [
       {
         id: "q7a",
-        prompt: "How complete is the electrical documentation for production?",
+        prompt: "A panel builder receives the job from engineering tomorrow morning. What information will they have to build it?",
         options: withUnselected([
-          { value: 1, label: "Only the circuit diagram is supplied to production." },
-          { value: 2, label: "between 1 and 3" },
-          { value: 3, label: "Terminal diagrams, assembly diagrams etc. are prepared for production." },
-          { value: 4, label: "between 3 and 5" },
-          { value: 5, label: "Complete wiring lists with ready-made wires are created for production." },
+          { value: 1, label: "Primarily the schematic." },
+          { value: 2, label: "Schematic plus some additional drawings / instructions." },
+          { value: 3, label: "Schematic, terminal information, panel layout and supporting reports." },
+          { value: 4, label: "Detailed connections, devices, layouts and manufacturing information." },
+          { value: 5, label: "Build-ready digital information such as wiring data, lengths / routing, terminal data and machine-ready manufacturing data." },
         ]),
       },
       {
         id: "q7b",
-        prompt: "How is the production documentation generated?",
+        prompt: "When the design changes, what happens to the terminal diagrams, wiring lists, BOMs, labels and other production reports?",
         options: withUnselected([
-          { value: 1, label: "The production documentation is created manually." },
+          { value: 1, label: "Someone manually updates / recreates them." },
           { value: 2, label: "between 1 and 3" },
-          { value: 3, label: "The production documentation is created partially automated by means of forms and templates." },
+          { value: 3, label: "Most reports are generated from the design, but some manual work remains." },
           { value: 4, label: "between 3 and 5" },
-          { value: 5, label: "The production documentation is automatically created and stored in a ERP/PDM system." },
+          { value: 5, label: "Updated documentation is generated and stored / distributed automatically." },
         ]),
       },
     ],
@@ -326,24 +356,24 @@ export const engineeringSections: SectionDefinition<keyof EngineeringAnswers>[] 
     questions: [
       {
         id: "q8a",
-        prompt: "Which drawing & design method is used to create the cabinet design and layout?",
+        prompt: "Your engineer needs to determine where everything will fit inside the enclosure. How is that normally done?",
         options: withUnselected([
-          { value: 1, label: "The cabinet design is carried out with sketches and without article reference." },
-          { value: 2, label: "between 1 and 3" },
-          { value: 3, label: "The cabinet design is carried out graphically in 2D based on article information." },
-          { value: 4, label: "between 3 and 5" },
-          { value: 5, label: "The cabinet design is carried out graphically in 3D based on article information." },
+          { value: 1, label: "Experience, dimensions and sketches." },
+          { value: 2, label: "Basic 2D layout using approximate / manual dimensions." },
+          { value: 3, label: "Detailed 2D layout using actual device information." },
+          { value: 4, label: "3D digital layout using actual devices and enclosure geometry." },
+          { value: 5, label: "Detailed 3D layout also drives downstream manufacturing information." },
         ]),
       },
       {
         id: "q8b",
-        prompt: "In which detail and quality level does the customer create cabinet layout drawings?",
+        prompt: "Once the panel layout is created, what can that design information be used for?",
         options: withUnselected([
-          { value: 1, label: "The cabinet design contains only the dimensions (construction plan)." },
+          { value: 1, label: "Primarily dimensions / construction reference." },
           { value: 2, label: "between 1 and 3" },
-          { value: 3, label: "The cabinet design allows automatic derivation of the NC data/programming (cut-outs, drilling, tapping)." },
+          { value: 3, label: "It can create manufacturing data such as drilling, cutouts or NC programming." },
           { value: 4, label: "between 3 and 5" },
-          { value: 5, label: "The cabinet design allows wiring routing (wire length calculation)." },
+          { value: 5, label: "It can also support routing, wire lengths and other production-ready information." },
         ]),
       },
     ],
@@ -357,13 +387,13 @@ export const productionSections: SectionDefinition<keyof ProductionAnswers>[] = 
     questions: [
       {
         id: "q11",
-        prompt: "How do you structure your bill of materials?",
+        prompt: "The shop is ready to pull and stage parts for a panel. What kind of BOM do they receive?",
         options: withUnselected([
-          { value: 1, label: "No BOM available" },
-          { value: 2, label: "BOM manual created" },
-          { value: 3, label: "BOM created based on CAE system" },
-          { value: 4, label: "BOM created based on CAE system with all panel components and accessories" },
-          { value: 5, label: "BOM per mounting location (e.g. individual BOMs for the body of the cabinet and one for the door)" },
+          { value: 1, label: "There is no reliable BOM; parts are identified from drawings or experience" },
+          { value: 2, label: "Someone manually creates a BOM for the build" },
+          { value: 3, label: "The BOM is generated from the electrical design" },
+          { value: 4, label: "The generated BOM includes the full set of panel components and accessories" },
+          { value: 5, label: "The BOM is organized by where parts will be installed, making kitting and staging easier" },
         ]),
       },
     ],
@@ -374,13 +404,13 @@ export const productionSections: SectionDefinition<keyof ProductionAnswers>[] = 
     questions: [
       {
         id: "q12",
-        prompt: "How are holes and cutouts made to the doors and mounting panels?",
+        prompt: "A technician is ready to drill and cut the enclosure or mounting plate. How do they know exactly where each hole and cutout goes?",
         options: withUnselected([
-          { value: 1, label: "Manual drilling and cutting according to each worker's own judgement" },
-          { value: 2, label: "Manual drilling and cutting using dimensioned panel layouts" },
-          { value: 3, label: "Manual drilling and cutting using templates from CAE software" },
-          { value: 4, label: "Using NC machines; data entered manually" },
-          { value: 5, label: "Using NC machines; data imported from CAE software" },
+          { value: 1, label: "They measure and lay it out themselves based on drawings and experience" },
+          { value: 2, label: "They work from a dimensioned panel layout" },
+          { value: 3, label: "Engineering provides drilling / cutout templates or manufacturing drawings" },
+          { value: 4, label: "An NC machine is used, but someone manually enters the coordinates / data" },
+          { value: 5, label: "Manufacturing data flows directly from engineering to the NC machine" },
         ]),
       },
     ],
@@ -391,13 +421,13 @@ export const productionSections: SectionDefinition<keyof ProductionAnswers>[] = 
     questions: [
       {
         id: "q13",
-        prompt: "How do you create and apply the component labels?",
+        prompt: "When it is time to label devices, terminals and components, how does the label information get from engineering to the printer?",
         options: withUnselected([
-          { value: 1, label: "Labels are typed in manually from the schematic and printed out" },
+          { value: 1, label: "Someone reads the drawing and types the labels manually" },
           { value: 2, label: "between 1 and 3" },
-          { value: 3, label: "The label information is exported from CAE and manually transferred to a label maker" },
+          { value: 3, label: "Label data is exported from engineering, then manually imported / transferred into the label software" },
           { value: 4, label: "between 3 and 5" },
-          { value: 5, label: "The label information is transferred automatically from the CAD/CAE to a label maker" },
+          { value: 5, label: "Label data flows directly from the engineering system to the label printer with little or no re-entry" },
         ]),
       },
     ],
@@ -408,13 +438,13 @@ export const productionSections: SectionDefinition<keyof ProductionAnswers>[] = 
     questions: [
       {
         id: "q14",
-        prompt: "How do you fabricate the wires for your control panels?",
+        prompt: "When a panel builder needs the next wire, how is that wire cut, stripped, terminated and identified?",
         options: withUnselected([
-          { value: 1, label: "Manual fabrication during wiring" },
+          { value: 1, label: "The technician measures and fabricates each wire manually while wiring" },
           { value: 2, label: "between 1 and 3" },
-          { value: 3, label: "Using a NC cutting and crimping machine, semi automated" },
+          { value: 3, label: "Wire data is used with a cutting / crimping machine, but some setup or handling is still manual" },
           { value: 4, label: "between 3 and 5" },
-          { value: 5, label: "Using a NC cutting and crimping machine, fully automated or outsourced fabrication" },
+          { value: 5, label: "Complete wire data drives automated fabrication, or ready-to-install wires are supplied from an automated / outsourced process" },
         ]),
       },
     ],
@@ -425,13 +455,13 @@ export const productionSections: SectionDefinition<keyof ProductionAnswers>[] = 
     questions: [
       {
         id: "q15",
-        prompt: "Which method do you use to cut mounting rails, wire ducts and wire duct covers?",
+        prompt: "A technician is preparing DIN rail and wire duct for a panel. How do they determine each cut length?",
         options: withUnselected([
-          { value: 1, label: "Manual measuring and cutting according to each worker's own judgement" },
-          { value: 2, label: "Manual measuring and cutting using dimensioned panel layout" },
-          { value: 3, label: "Manual cutting using cutting list from CAE software" },
-          { value: 4, label: "Measuring and cutting performed by NC machines, data entered manually" },
-          { value: 5, label: "Measuring and cutting performed by NC machines with data from CAE software" },
+          { value: 1, label: "They measure the panel and determine each cut themselves" },
+          { value: 2, label: "They work from dimensions shown on the panel layout" },
+          { value: 3, label: "Engineering provides a cut list with the required lengths" },
+          { value: 4, label: "A machine performs the cuts, but someone manually enters the data" },
+          { value: 5, label: "Cut data flows directly from engineering to the cutting machine" },
         ]),
       },
     ],
@@ -442,13 +472,13 @@ export const productionSections: SectionDefinition<keyof ProductionAnswers>[] = 
     questions: [
       {
         id: "q16",
-        prompt: "What documents do you use in the manufacturing process?",
+        prompt: "When someone starts mounting devices in the enclosure, what do they use to know exactly where each component goes?",
         options: withUnselected([
-          { value: 1, label: "Placement according to each worker's own judgement" },
-          { value: 2, label: "between 1 and 3" },
-          { value: 3, label: "Placement according to a basic panel layout" },
-          { value: 4, label: "between 3 and 5" },
-          { value: 5, label: "Placement according to a detailed panel layout" },
+          { value: 1, label: "The assembler relies heavily on experience and interprets the schematic / available information" },
+          { value: 2, label: "A basic drawing gives general placement, but the assembler still makes many layout decisions" },
+          { value: 3, label: "A panel layout shows where major components should be installed" },
+          { value: 4, label: "A detailed layout includes accurate devices, dimensions and mounting information" },
+          { value: 5, label: "Production receives a detailed build-ready layout that minimizes interpretation on the shop floor" },
         ]),
       },
     ],
@@ -459,13 +489,13 @@ export const productionSections: SectionDefinition<keyof ProductionAnswers>[] = 
     questions: [
       {
         id: "q17",
-        prompt: "How do you assemble your terminal strips?",
+        prompt: "The technician is ready to build a terminal strip. How do they know which terminals to use, the order, and how each one should be labeled?",
         options: withUnselected([
-          { value: 1, label: "Terminals are manually identified, placed and labeled based on the schematic" },
-          { value: 2, label: "Terminals are manually identified, placed and labeled based on a terminal diagram" },
-          { value: 3, label: "Preassembled by the manufacturer (e.g. Phoenix Contact Clip Project) with data from CAE software" },
-          { value: 4, label: "between 3 and 5" },
-          { value: 5, label: "Terminal strips are assembled automatically using a NC machine" },
+          { value: 1, label: "They work through the schematic and manually identify, place and label each terminal" },
+          { value: 2, label: "They work from a dedicated terminal diagram but still assemble and label manually" },
+          { value: 3, label: "Structured engineering data can be sent to a supplier to preassemble the terminal strip" },
+          { value: 4, label: "Much of the preparation is automated, with limited manual assembly remaining" },
+          { value: 5, label: "Terminal-strip data directly drives an automated assembly process" },
         ]),
       },
     ],
@@ -476,13 +506,13 @@ export const productionSections: SectionDefinition<keyof ProductionAnswers>[] = 
     questions: [
       {
         id: "q18",
-        prompt: "What documents do you use for the wiring process?",
+        prompt: "When the electrician is wiring the panel, what information do they have for each connection?",
         options: withUnselected([
-          { value: 1, label: "Schematic diagrams" },
-          { value: 2, label: "between 1 and 3" },
-          { value: 3, label: "Wiring / connection lists (only source and target information)" },
-          { value: 4, label: "between 3 and 5" },
-          { value: 5, label: "Digital panel wiring tool (wire size, length, termination type, routing path, source and target)" },
+          { value: 1, label: "They trace the schematic to determine each connection" },
+          { value: 2, label: "They use the schematic plus some supplemental wiring information" },
+          { value: 3, label: "A connection list identifies the source and target for each wire" },
+          { value: 4, label: "Wiring data also includes details such as wire size, color or termination information" },
+          { value: 5, label: "A digital wiring workflow provides source, target, wire properties, length / routing and step-by-step build information" },
         ]),
       },
     ],
